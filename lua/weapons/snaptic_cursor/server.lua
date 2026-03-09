@@ -73,6 +73,13 @@ function SWEP:PrimaryAttack()
             self:ContextRelease()
         end
     end
+
+    if IsValid(self:GetDragCursor()) then
+        local drag_cursor = self:GetDragCursor()
+        if drag_cursor:GetType() == "unavail" then
+            EmitSound("snaptic/win7_error.mp3", drag_cursor:GetPos(), 0, CHAN_AUTO, 1, 75, 0, 100 + math.random(-25, 25))
+        end
+    end
 end
 
 function SWEP:SecondaryAttack()
