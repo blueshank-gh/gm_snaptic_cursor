@@ -31,6 +31,7 @@ function SWEP:CreateContext(cursor, target)
     if not IsValid(context) then
         return
     end
+    context:RePosition()
     self.Context = context
     return context
 end

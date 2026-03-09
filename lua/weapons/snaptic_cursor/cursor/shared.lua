@@ -164,6 +164,8 @@ end
 
 function ENT:OnRemove()
     local operator = self:GetOperator()
+    if SERVER then self:Show() end
+
     if IsValid(operator) then
         local cursors = operator.Cursors
         for i=1, #cursors do

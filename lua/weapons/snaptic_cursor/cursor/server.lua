@@ -43,6 +43,7 @@ function ENT:OnTakeDamage(cdmg)
         lives = lives - 1
         durability = self.CVAR_Durability:GetFloat()
         self:SetImmunity(ct + 1)
+        if self.zip then self:UnZipify() end
     end
 
     if lives == 0 then

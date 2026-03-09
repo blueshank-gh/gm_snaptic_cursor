@@ -223,36 +223,88 @@ function ENT:Populate()
             end, "gun")
         end
 
-        self:AddOption("Ignite", function(invoker, operator, context, cursor, target)
-            target:Ignite(60)
-            context:Close()
-        end, "fire")
-
-        self:AddOption("Zipify", function(invoker, operator, context, cursor, target)
-            cursor:Zipify(target)
-            context:Close()
-        end, "package_add")
-
-        self:AddOption("Boxify", function(invoker, operator, context, cursor, target)
-            operator.Helpers.Boxify(target)
-            for i=1, 10 do
-                operator.Helpers.Annihilate(invoker, target, 10000)
+        if properties.CanBeTargeted(entity, invoker) or entity:IsPlayer() then
+            if entity:IsOnFire() then
+                self:AddOption("Extinguish", function(invoker, operator, context, cursor, target)
+                    target:Extinguish()
+                    context:Close()
+                end, "water")
+            else
+                self:AddOption("Ignite", function(invoker, operator, context, cursor, target)
+                    target:Ignite(360)
+                    context:Close()
+                end, "fire")
             end
-            if IsValid(target) then
-                if target:IsPlayer() then
-                    target:UnLock()
-                    target:SetMoveType(MOVETYPE_WALK)
-                    target:SetCollisionGroup(COLLISION_GROUP_PLAYER)
-                    target:KillSilent()
-                elseif target:IsNPC() or target:IsNextBot() or target.Health then
-                    target:Dissolve()
+
+            if not entity:IsPlayer() then
+                if entity:GetCollisionGroup() ~= COLLISION_GROUP_NONE then
+                    self:AddOption("Enable Collisions", function(invoker, operator, context, cursor, target)
+                        if not properties.CanBeTargeted(target, invoker) then return end
+                        target:SetCollisionGroup(COLLISION_GROUP_NONE)
+                        context:Close()
+                    end, "collision_on")
+                else
+                    self:AddOption("Disable Collisions", function(invoker, operator, context, cursor, target)
+                        if not properties.CanBeTargeted(target, invoker) then return end
+                        target:SetCollisionGroup(COLLISION_GROUP_WORLD)
+                        context:Close()
+                    end, "collision_off")
+                end
+
+                if gamemode.Call("CanProperty", invoker, "remover", entity) then
+                    self:AddOption("Remove", function(invoker, operator, context, cursor, target)
+                        if not properties.CanBeTargeted(target, invoker) or not gamemode.Call("CanProperty", invoker, "remover", entity) then return end
+                        context:Close()
+                        target:Remove()
+                    end, "delete")
                 end
             end
-            context:Close()
-        end, "asterisk_yellow")
-        return true
+
+            self:AddSpacer()
+
+            self:AddOption("Zipify", function(invoker, operator, context, cursor, target)
+                cursor:Zipify(target)
+                context:Close()
+            end, "package_add")
+
+            self:AddOption("Boxify", function(invoker, operator, context, cursor, target)
+                operator.Helpers.Boxify(target)
+                for i=1, 10 do
+                    operator.Helpers.Annihilate(invoker, target, 10000)
+                end
+                if IsValid(target) then
+                    if target:IsPlayer() then
+                        target:UnLock()
+                        target:SetMoveType(MOVETYPE_WALK)
+                        target:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+                        target:KillSilent()
+                    elseif target:IsNPC() or target:IsNextBot() or target.Health then
+                        target:Dissolve()
+                    end
+                end
+                context:Close()
+            end, "asterisk_yellow")
+        end
+
+        return #self.options ~= 0
     end
     return false
+end
+
+function ENT:RePosition()
+    local origin = self:GetPos()
+    local up = self:GetAngles():Up()
+    local size = -1 + self:OBBMins().z
+    local tr = util.TraceLine({
+        start = origin,
+        endpos = origin + up * size,
+        filter = self,
+        mask = MASK_SHOT
+    })
+
+    if tr.Hit then
+        self:SetPos(origin + (up * (1-tr.Fraction) * -size))
+    end
 end
 
 function ENT:Initialize()
@@ -352,6 +404,7 @@ function ENT:Think()
 
         if self:GetPos():Distance(center) > self_radius + 250 then
             self:Remove()
+            return
         end
     end
 end

@@ -29,6 +29,7 @@ do
         self.predicted_position = vec
     end
 
+    local package_material = Material("icon16/package.png")
     function ENT:Render()
         if self:GetHidden() then return end
 
@@ -59,20 +60,6 @@ do
         local material = self.Types[type]
         if not material then material = self.Types.arrow end
 
-        if self:GetEmote() + 1 > ct and self.Types.hand_open then
-            material = self.Types.hand_open
-        end
-
-        if self:GetImmunity() > ct then
-            color = Color(255, 0, 0)
-            local rnd = self.Types_RND
-            local select = 1 + (math.Round(ct * 25) % #rnd)
-            local id = rnd[select]
-            material = self.Types[id]
-            position = position + VectorRand(-2, 2)
-        end
-
-        render.SetMaterial(material)
         local ep = EyePos()
         local ignorez = true
 
@@ -85,6 +72,35 @@ do
                 mask = MASK_SHOT
             }, LocalPlayer(), operator:IsDragging()).Hit
         end
+
+        if self:GetEmote() + 1 > ct and self.Types.hand_open then
+            material = self.Types.hand_open
+        end
+
+        if self:GetZipped() then
+            local scale = owner:GetModelScale()
+            local angle = ct * -60
+            local rad = math.rad(angle)
+            local x = math.cos(rad) * ((size/4) + 2.5 * scale)
+            local y = math.sin(rad) * ((size/4) + 2.5 * scale)
+            local wish = position + Vector(x, y, 0)
+
+            cam.IgnoreZ(ignorez)
+            render.SetMaterial(package_material)
+            render.DrawSprite(wish, size/5, size/5, color_white)
+            cam.IgnoreZ(false)
+        end
+
+        if self:GetImmunity() > ct then
+            color = Color(255, 0, 0)
+            local rnd = self.Types_RND
+            local select = 1 + (math.Round(ct * 25) % #rnd)
+            local id = rnd[select]
+            material = self.Types[id]
+            position = position + VectorRand(-2, 2)
+        end
+
+        render.SetMaterial(material)
 
         do
             local center = operator.Helpers.OBBCenter(owner)
