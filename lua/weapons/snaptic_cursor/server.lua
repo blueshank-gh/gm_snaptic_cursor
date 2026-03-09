@@ -132,7 +132,7 @@ function SWEP:SecondaryAttack()
                     self.Helpers.Click(drag_cursor:GetPos() + drag_cursor:OBBCenter())
                     self.Trace = tr
                     local ctx = self:CreateContext(drag_cursor, tr.Entity)
-                    if IsValid(ctx) then
+                    if IsValid(ctx) and tr.Entity == owner then
                         local ea = owner:EyeAngles()
                         ea.p = 0
                         ea.r = 0
