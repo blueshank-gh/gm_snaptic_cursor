@@ -102,7 +102,7 @@ function ENT:Zipify(target)
         local operator = self:GetOperator()
         if not IsValid(operator) then return end
         local owner = operator:GetOwner()
-        local tr = self:TraceLine({
+        local tr = operator:TraceLine({
             start = self:GetPos(),
             endpos = target:GetPos() + target:OBBCenter(),
             mask = MASK_SHOT
