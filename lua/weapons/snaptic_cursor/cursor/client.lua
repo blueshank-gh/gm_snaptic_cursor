@@ -170,11 +170,10 @@ do
     hook.Add("PostDrawTranslucentRenderables", "Snaptic.Cursors", function(bDrawingDepth, bDrawingSkybox, isDraw3DSkybox)
         if bDrawingSkybox then return end
         local cursors = ENT.Cursors
-        local c = 0
-        for i=1, #cursors do
-            local cursor = cursors[i-c]
+        for i=#cursors, 1, -1 do
+            local cursor = cursors[i]
             if not IsValid(cursor) then
-                table.remove(cursor, i-c) c = c + 1
+                table.remove(cursor, i)
                 cursors[cursor] = nil
                 continue
             end

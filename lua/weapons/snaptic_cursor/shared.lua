@@ -166,6 +166,7 @@ end
 function SWEP:CanDrag(entity)
     if not IsValid(entity) then return false end
     local owner = self:GetOwner()
+    if not IsValid(owner) then return false end -- This should never happen...
     local interaction = hook.Run("Snaptic.Interact", owner, self, entity)
     if interaction ~= nil then return interaction end
     if entity == owner then return true end

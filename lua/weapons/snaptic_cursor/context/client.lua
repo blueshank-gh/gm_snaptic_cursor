@@ -131,10 +131,10 @@ do
         if bDrawingSkybox then return end
         local contexts = ENT.Contexts
         local c = 0
-        for i=1, #contexts do
-            local context = contexts[i-c]
+        for i=#contexts, 1, -1 do
+            local context = contexts[i]
             if not IsValid(context) then
-                table.remove(contexts, i-c) c = c + 1
+                table.remove(contexts, i)
                 contexts[context] = nil
                 continue
             end

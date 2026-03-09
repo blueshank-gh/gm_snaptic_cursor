@@ -196,11 +196,10 @@ end)
 -- if ragdolled player disconnected, delete their ragdoll
 hook.Add("PlayerDisconnected", "Snaptic_Ragdoll", function(invoker)
     local r = Ragdoll.registry
-    local c = 0
-    for i=1, #r do
-        local ragdoll = r[i-c]
+    for i=#r, 1, -1 do
+        local ragdoll = r[i]
         if not IsValid(ragdoll) then
-            table.remove(r, i-c) c = c + 1
+            table.remove(r, i)
             continue
         end
         if ragdoll.caller == invoker then
@@ -232,10 +231,10 @@ hook.Add("Think", "Snaptic_Ragdoll", function()
     local st = SysTime()
     local r = Ragdoll.registry
     local c = 0
-    for i=1, #r do
-        local ragdoll = r[i-c]
+    for i=#r, 1, -1 do
+        local ragdoll = r[i]
         if not IsValid(ragdoll) then
-            table.remove(r, i-c) c = c + 1
+            table.remove(r, i)
             continue
         end
         local controller = Ragdoll.GetController(ragdoll)

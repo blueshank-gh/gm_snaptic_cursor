@@ -394,7 +394,7 @@ function ENT:Populate()
                 end
             else
                 self:AddOption("UnArchive", function(invoker, operator, context, cursor, target)
-                    entity:Remove()
+                    target:Remove()
                     context:Close()
                 end, "package_delete")
             end

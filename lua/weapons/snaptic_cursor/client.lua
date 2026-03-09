@@ -251,11 +251,10 @@ end
 function SWEP:Calculate(active)
     local cursors = self.Cursors
 
-    local c = 0
-    for i=1, #cursors do
-        local cursor = cursors[i-c]
+    for i=#cursors, 1, -1 do
+        local cursor = cursors[i]
         if not IsValid(cursor) then
-            table.remove(cursors, i-c) c = c + 1
+            table.remove(cursors, i)
             cursors[cursor] = nil
             continue
         end
@@ -339,11 +338,10 @@ end)
 hook.Add("PostDrawTranslucentRenderables", "Snaptic.Render", function(bDrawingDepth, bDrawingSkybox, isDraw3DSkybox)
     if bDrawingSkybox then return end
     local operators = Snaptic.Operators
-    local c = 0
-    for i=1, #operators do
-        local operator = operators[i-c]
+    for i=#operators, 1, -1 do
+        local operator = operators[i]
         if not IsValid(operator) then
-            table.remove(operators, i-c) c = c + 1
+            table.remove(operators, i)
             operators[operator] = nil
             continue
         end
