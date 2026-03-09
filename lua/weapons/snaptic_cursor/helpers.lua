@@ -81,6 +81,87 @@ Helpers.Boxify = function(invoker)
     end)
 end
 
+local function create_file(target, operator, name, icon, size)
+    local _f = ents.Create("snaptic_file")
+    local obb = target:OBBCenter()
+    obb:Rotate(target:GetAngles())
+    _f:SetPos(target:GetPos() + obb)
+    _f:SetAngles(target:GetAngles())
+    _f:SetOperator(operator)
+    _f:SetTitle(name)
+    _f:SetIcon(icon)
+    _f:SetSize(size)
+    _f:Activate()
+    _f:Spawn()
+    local phys = _f:GetPhysicsObject()
+    if IsValid(phys) then
+        phys:EnableGravity(false)
+        phys:EnableMotion(true)
+        phys:Wake()
+        phys:ApplyForceCenter(VectorRand(-2000, 2000))
+        phys:AddAngleVelocity(VectorRand(-300, 300))
+    end
+    return _f
+end
+
+Helpers.Extract = function(target, operator)
+    target:EmitSound("snaptic/skype_end_call.mp3")
+
+    local files = {}
+    do
+        files[#files+1] = create_file(target, operator,
+            target:GetModel():match("([^/\\]+)$"),
+            "icon16/database_gear.png",
+            file.Size(target:GetModel(), "GAME")
+        )
+    end
+
+    local mat_types = {
+        ".vtf", [".vtf"] = "icon16/image.png",
+        ".vmt", [".vmt"] = "icon16/script_gear.png",
+    }
+    do
+        local materials = target:GetMaterials()
+        for i=1, #materials do
+            local material = materials[i]
+            local sub_material = target:GetSubMaterial(i-1)
+            if sub_material ~= "" and sub_material then
+                material = sub_material
+            end
+
+            for k=1, #mat_types do
+                local ext = mat_types[k]
+                local path = "materials/" .. material .. ext
+                if file.Exists(path, "GAME") then
+                    files[#files+1] = create_file(target, operator,
+                        path:match("([^/\\]+)$"),
+                        mat_types[ext],
+                        file.Size(path, "GAME")
+                    )
+                end
+            end
+        end
+    end
+
+    timer.Simple(5, function()
+        for i=1, #files do
+            local entry = files[i]
+            if IsValid(entry) then
+                entry:Dissolve()
+            end
+        end
+    end)
+
+    timer.Simple(6, function()
+        for i=1, #files do
+            local entry = files[i]
+            if IsValid(entry) then
+                entry:Remove()
+            end
+        end
+    end)
+end
+
 local damage_types = {
     DMG_GENERIC, DMG_PHYSGUN, DMG_BLAST, DMG_SHOCK, DMG_MISSILEDEFENSE, DMG_AIRBOAT, DMG_BURN, DMG_BULLET
 }

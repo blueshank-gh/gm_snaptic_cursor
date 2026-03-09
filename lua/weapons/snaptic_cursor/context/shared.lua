@@ -15,6 +15,7 @@ ENT.AdminSpawnable	= false
 ENT.Category		= "Other"
 ENT.AutomaticFrameAdvance = true
 ENT.Author          = "BlueShank"
+ENT.Snaptic         = true
     
 function ENT:SetupDataTables()
     if self.DTSetup then return end
@@ -252,33 +253,144 @@ function ENT:Populate()
 
             self:AddSpacer()
 
-            if entity:GetClass() ~= "snaptic_archive" then
-                self:AddOption("Archive", function(invoker, operator, context, cursor, target)
-                    local archive = ents.Create("snaptic_archive")
-                    archive:SetOperator(operator)
-                    local obb = target:OBBCenter()
-                    obb:Rotate(target:GetAngles())
-                    archive:SetPos(target:GetPos() + obb)
-                    archive:SetAngles(target:GetAngles())
-                    archive:Activate()
-                    archive:Spawn()
-                    if not archive:Compress(target, operator.Trace) then
-                        archive:Remove()
-                        context:Close()
-                        return
+            if not entity.Snaptic then
+                self:AddOption("Extract", function(invoker, operator, context, cursor, target)
+                    do
+                        local materials = target:GetMaterials()
+                        for i=1, #materials do
+                            local material = materials[i]
+                            local sub_material = target:GetSubMaterial(i-1)
+                            if sub_material ~= "" and sub_material then
+                                material = sub_material
+                            else
+                                sub_material = nil
+                            end
+                            
+                            local path = "materials/" .. material .. ".vtf"
+                            
+                            if file.Exists(path, "GAME") then
+                                local _f = ents.Create("snaptic_file")
+                                local obb = target:OBBCenter()
+                                obb:Rotate(target:GetAngles())
+                                _f:SetPos(target:GetPos() + obb)
+                                _f:SetAngles(target:GetAngles())
+                                _f:SetRelative(true)
+                                _f:SetOperator(operator)
+                                _f:SetRelation(target)
+                                _f:SetTitle(path:match("([^/\\]+)$"))
+                                _f:SetIcon("icon16/image.png")
+                                _f:SetSize(file.Size(path, "GAME"))
+                                _f:Activate()
+                                _f:Spawn()
+                                function _f:PhysicsCollide( data, phys )
+                                    if data.HitEntity == target then
+                                        self:Remove()
+                                    end
+                                end
+                                function _f:OnRemove()
+                                    if not IsValid(target) then return end
+                                    target:SetSubMaterial(i-1, sub_material)
+                                end
+                                local phys = _f:GetPhysicsObject()
+                                if IsValid(phys) then
+                                    phys:EnableMotion(true)
+                                    phys:Wake()
+                                    phys:ApplyForceCenter(VectorRand(-2000, 2000))
+                                    phys:AddAngleVelocity(VectorRand(-300, 300))
+                                end
+
+                                target:SetSubMaterial(i-1, "models/debug/debugwhite")
+                            end
+                        end
                     end
-                    local phys = archive:GetPhysicsObject()
-                    if IsValid(phys) then
-                        phys:EnableMotion(true)
-                        phys:Wake()
-                    end
-                    if target:IsPlayer() then
-                        target:UnLock()
-                        target:SetMoveType(MOVETYPE_WALK)
-                        target:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+
+                    do
+                        local mdl = target:GetModel()
+                        local _f = ents.Create("snaptic_file")
+                        local obb = target:OBBCenter()
+                        obb:Rotate(target:GetAngles())
+                        _f:SetPos(target:GetPos() + obb)
+                        _f:SetAngles(target:GetAngles())
+                        _f:SetRelative(true)
+                        _f:SetOperator(operator)
+                        _f:SetRelation(target)
+                        _f:SetTitle(mdl:match("([^/\\]+)$"))
+                        _f:SetIcon("icon16/database_gear.png")
+                        _f:SetSize(file.Size(mdl, "GAME"))
+                        _f:Activate()
+                        _f:Spawn()
+                        function _f:PhysicsCollide( data, phys )
+                            if data.HitEntity == target then
+                                self:Remove()
+                            end
+                        end
+                        function _f:OnRemove()
+                            if not IsValid(target) then return end
+                            target:SetModel(mdl)
+                        end
+                        local phys = _f:GetPhysicsObject()
+                        if IsValid(phys) then
+                            phys:EnableMotion(true)
+                            phys:Wake()
+                            phys:ApplyForceCenter(VectorRand(-2000, 2000))
+                            phys:AddAngleVelocity(VectorRand(-300, 300))
+                        end
+                        target:SetModel("error.mdl")
                     end
                     context:Close()
-                end, "package_add")
+                end, "database_go")
+                
+                self:AddOption("Dismantle", function(invoker, operator, context, cursor, target)
+                    operator.Helpers.Extract(target, operator)
+
+                    for i=1, 10 do
+                        operator.Helpers.Annihilate(invoker, target, 10000)
+                    end
+
+                    if IsValid(target) then
+                        if target:IsPlayer() then
+                            target:UnLock()
+                            target:SetMoveType(MOVETYPE_WALK)
+                            target:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+                            target:KillSilent()
+                        elseif target:IsNPC() or target:IsNextBot() or target.Health then
+                            target:Dissolve()
+                        end
+                    end
+
+                    context:Close()
+                end, "database_delete")
+            end
+
+            if entity:GetClass() ~= "snaptic_archive" then
+                if not entity.Snaptic then
+                    self:AddOption("Archive", function(invoker, operator, context, cursor, target)
+                        local archive = ents.Create("snaptic_archive")
+                        archive:SetOperator(operator)
+                        local obb = target:OBBCenter()
+                        obb:Rotate(target:GetAngles())
+                        archive:SetPos(target:GetPos() + obb)
+                        archive:SetAngles(target:GetAngles())
+                        archive:Activate()
+                        archive:Spawn()
+                        if not archive:Compress(target, operator.Trace) then
+                            archive:Remove()
+                            context:Close()
+                            return
+                        end
+                        local phys = archive:GetPhysicsObject()
+                        if IsValid(phys) then
+                            phys:EnableMotion(true)
+                            phys:Wake()
+                        end
+                        if target:IsPlayer() then
+                            target:UnLock()
+                            target:SetMoveType(MOVETYPE_WALK)
+                            target:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+                        end
+                        context:Close()
+                    end, "package_add")
+                end
             else
                 self:AddOption("UnArchive", function(invoker, operator, context, cursor, target)
                     entity:Remove()
@@ -409,7 +521,7 @@ function ENT:Think()
     end
 
     if self:GetCollisionGroup() ~= COLLISION_GROUP_WORLD then
-        self:SetMoveType(COLLISION_GROUP_WORLD)
+        self:SetCollisionGroup(COLLISION_GROUP_WORLD)
     end
 
     local phys = self:GetPhysicsObject()

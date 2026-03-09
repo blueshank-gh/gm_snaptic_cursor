@@ -16,6 +16,7 @@ SWEP.Author = "BlueShank"
 SWEP.Contact = "abuse@msn.com" -- don't actually contact this :rofl:
 SWEP.Category = "Other"
 SWEP.IconOverride = "snaptic/snaptic_cursor.png"
+SWEP.Snaptic = true
 
 SWEP.Spawnable = true
 SWEP.ViewModel = ""
@@ -239,6 +240,11 @@ if SERVER then -- Context
     AddCSLuaFile("context/shared.lua")
 end
 include("context/shared.lua")
+
+if SERVER then -- File
+    AddCSLuaFile("file/shared.lua")
+end
+include("file/shared.lua")
 
 if SERVER then -- Archive
     AddCSLuaFile("archive/shared.lua")

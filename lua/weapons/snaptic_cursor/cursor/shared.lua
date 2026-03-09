@@ -15,6 +15,7 @@ ENT.AdminSpawnable	= false
 ENT.Category		= "Other"
 ENT.AutomaticFrameAdvance = true
 ENT.Author          = "BlueShank"
+ENT.Snaptic         = true
 
 ENT.Types = { -- this is also used to check if it should use a selected mode, defaulting to "arrow"
     arrow = Material("materials/snaptic/aero_arrow.png"),
@@ -219,7 +220,7 @@ function ENT:Think()
     end
 
     if self:GetCollisionGroup() ~= COLLISION_GROUP_WORLD then
-        self:SetMoveType(COLLISION_GROUP_WORLD)
+        self:SetCollisionGroup(COLLISION_GROUP_WORLD)
     end
 
     local phys = self:GetPhysicsObject()
