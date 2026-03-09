@@ -33,8 +33,6 @@ function ENT:SetupDataTables()
 end
 
 function ENT:SetupPhysics()
-    self:SetMoveType(MOVETYPE_NONE)
-    if SERVER then self:SetUseType(SIMPLE_USE) end
     self:PhysicsInit(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
@@ -134,14 +132,7 @@ function ENT:Populate()
         return override
     end
 
-    if entity == self:GetCursor() then
-        local position = entity:GetPos()
-        self:AddOption("UnZipify", function(invoker, operator, context, cursor, target)
-            cursor:UnZipify(position)
-            context:Close()
-        end, "package_delete")
-        return true
-    elseif entity == invoker then
+    if entity == operator then
         self:AddOption("Always Active", function(invoker, operator, context, cursor, target)
             operator:SetAlways(not operator:GetAlways())
             context:Close()
@@ -182,7 +173,7 @@ function ENT:Populate()
             context:Close()
         end, "bug")
         return true
-    elseif operator:CanDrag(entity) then
+    elseif operator:CanDrag(entity) or entity:GetClass() == "snaptic_archive" then
         local ragdoll_controller = operator.Ragdoll.GetController(entity)
         if ragdoll_controller then
             self:AddOption("UnRagdoll", function(invoker, operator, context, cursor, target)
@@ -193,6 +184,13 @@ function ENT:Populate()
                 operator.Ragdoll.Stop(ragdoll_controller)
                 context:Close()
             end, "user_delete")
+        end
+
+        if entity:GetClass() == "snaptic_archive" then
+            self:AddOption("UnArchive", function(invoker, operator, context, cursor, target)
+                entity:Remove()
+                context:Close()
+            end, "package_delete")
         end
 
         if entity:IsPlayer() then
@@ -262,10 +260,34 @@ function ENT:Populate()
 
             self:AddSpacer()
 
-            self:AddOption("Zipify", function(invoker, operator, context, cursor, target)
-                cursor:Zipify(target)
-                context:Close()
-            end, "package_add")
+            if entity:GetClass() ~= "snaptic_archive" then
+                self:AddOption("Archive", function(invoker, operator, context, cursor, target)
+                    local archive = ents.Create("snaptic_archive")
+                    archive:SetOperator(operator)
+                    local obb = target:OBBCenter()
+                    obb:Rotate(target:GetAngles())
+                    archive:SetPos(target:GetPos() + obb)
+                    archive:SetAngles(target:GetAngles())
+                    if not archive:Compress(target, operator.Trace) then
+                        archive:Remove()
+                        context:Close()
+                        return
+                    end
+                    archive:Activate()
+                    archive:Spawn()
+                    local phys = archive:GetPhysicsObject()
+                    if IsValid(phys) then
+                        phys:EnableMotion(true)
+                        phys:Wake()
+                    end
+                    if target:IsPlayer() then
+                        target:UnLock()
+                        target:SetMoveType(MOVETYPE_WALK)
+                        target:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+                    end
+                    context:Close()
+                end, "package_add")
+            end
 
             self:AddOption("Boxify", function(invoker, operator, context, cursor, target)
                 operator.Helpers.Boxify(target)
@@ -387,6 +409,10 @@ function ENT:Think()
 
     if self:GetMoveType() ~= MOVETYPE_VPHYSICS then
         self:SetMoveType(MOVETYPE_VPHYSICS)
+    end
+
+    if self:GetCollisionGroup() ~= COLLISION_GROUP_WORLD then
+        self:SetMoveType(COLLISION_GROUP_WORLD)
     end
 
     local phys = self:GetPhysicsObject()

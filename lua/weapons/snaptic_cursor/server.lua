@@ -32,27 +32,22 @@ function SWEP:CreateContext(cursor, target)
         return
     end
     context:RePosition()
-    self.Context = context
+    self:SetContext(context)
     return context
 end
 
-function SWEP:GetContext()
-    if IsValid(self.Context) then
-        return self.Context
-    end
-    return false
-end
-
 function SWEP:ContextRelease()
-    if self.Context then
+    local ctx = self:GetContext()
+    if IsValid(ctx) then
         if not self:GetDrag() then
             self:SetDragCursor(nil)
         end
-
-        if IsValid(self.Context) then
-            self.Context:Remove()
+        
+        if IsValid(ctx) then
+            ctx:Remove()
         end
-        self.Context = nil
+        
+        self:SetContext(NULL)
     end
 end
 
@@ -62,7 +57,7 @@ function SWEP:PrimaryAttack()
     local owner = self:GetOwner()
     local aim_vector = owner:GetAimVector()
 
-    if current then
+    if IsValid(current) then
         owner:LagCompensation(true)
         local ep = owner:EyePos()
         local tr = self:TraceLine({
@@ -101,41 +96,52 @@ function SWEP:SecondaryAttack()
             self.dragging_debounce = true -- debounce for waiting on next attack
         elseif IsValid(self:GetDragCursor()) then
             local drag_cursor = self:GetDragCursor()
-            if drag_cursor:GetZipped() then
-                local owner = self:GetOwner()
-                local ctx = self:CreateContext(drag_cursor, drag_cursor)
-                local ea = owner:EyeAngles()
-                ea.p = 0
-                ea.r = 0
-                local self_radius = self.Helpers.OBBRadius(owner)
-                ctx:SetPos(owner:GetPos() + owner:OBBCenter() + ea:Forward() * (self_radius + 20))
-                ctx:SetAngles((ctx:GetPos() - owner:EyePos()):Angle())
-                local obb = ctx:OBBCenter()
-                obb:Rotate(ctx:GetAngles())
-                self.Helpers.Click(ctx:GetPos())
-                ctx:SetPos(ctx:GetPos() - obb)
+            local owner = self:GetOwner()
+            local aim_vector = owner:GetAimVector()
+            local current = self:GetContext()
+
+            owner:LagCompensation(true)
+            local ep = owner:EyePos()
+            local tr = self:TraceLine({
+                start = ep,
+                endpos = ep + aim_vector * 50000,
+                mask = MASK_SHOT
+            }, owner, current)
+            owner:LagCompensation(false)
+            
+            do
+                local min = owner:OBBMins()
+                local max = owner:OBBMaxs()
+                max.z = 10
+                min.z = -10
+                local localPos = owner:WorldToLocal(tr.HitPos)
+                if localPos.x >= min.x and localPos.x <= max.x and
+                    localPos.y >= min.y and localPos.y <= max.y and
+                    localPos.z >= min.z and localPos.z <= max.z then
+                    tr.Entity = owner
+                    tr.HitPos = owner:GetPos() + owner:OBBCenter()
+                    tr.PhysicsBone = 0
+                end
+            end
+
+            if IsValid(current) and current:GetTarget() == tr.Entity then
+                self:ContextRelease()
             else
-                local owner = self:GetOwner()
-                local aim_vector = owner:GetAimVector()
-                local current = self:GetContext()
-
-                owner:LagCompensation(true)
-                local ep = owner:EyePos()
-                local tr = self:TraceLine({
-                    start = ep,
-                    endpos = ep + aim_vector * 50000,
-                    mask = MASK_SHOT
-                }, owner, current)
-                owner:LagCompensation(false)
-
-                if current and current:GetTarget() == tr.Entity then
-                    self:ContextRelease()
-                else
-                    self:ContextRelease()
-                    if tr.Hit and IsValid(tr.Entity) and self:CanDrag(tr.Entity) then
-                        drag_cursor.Trace = tr
-                        self.Helpers.Click(drag_cursor:GetPos() + drag_cursor:OBBCenter())
-                        self:CreateContext(drag_cursor, tr.Entity)
+                self:ContextRelease()
+                if tr.Hit and IsValid(tr.Entity) and self:CanDrag(tr.Entity) then
+                    self.Helpers.Click(drag_cursor:GetPos() + drag_cursor:OBBCenter())
+                    self.Trace = tr
+                    local ctx = self:CreateContext(drag_cursor, tr.Entity)
+                    if IsValid(ctx) then
+                        local ea = owner:EyeAngles()
+                        ea.p = 0
+                        ea.r = 0
+                        local self_radius = self.Helpers.OBBRadius(owner)
+                        ctx:SetPos(owner:GetPos() + owner:OBBCenter() + ea:Forward() * (self_radius + 20))
+                        ctx:SetAngles((ctx:GetPos() - owner:EyePos()):Angle())
+                        local obb = ctx:OBBCenter()
+                        obb:Rotate(ctx:GetAngles())
+                        ctx:SetPos(ctx:GetPos() - obb)
                     end
                 end
             end
@@ -149,7 +155,7 @@ function SWEP:Reload()
     local owner = self:GetOwner()
     if not self:IsDragging() then
         local previous_ctx = self:GetContext()
-        if previous_ctx then
+        if IsValid(previous_ctx) then
             if not self:GetDrag() then
                 self:SetDragCursor(nil)
             end
@@ -161,7 +167,7 @@ function SWEP:Reload()
 
         if self.Cursors[1] then
             local drag_cursor = self.Cursors[1]
-            local ctx = self:CreateContext(drag_cursor, owner)
+            local ctx = self:CreateContext(drag_cursor, self)
             if not ctx then return end
             self:SetDragCursor(drag_cursor)
             self:Calculate(true)
@@ -517,7 +523,7 @@ do -- DragLogic
         if context == tr.Entity then
             context:Process(tr.HitPos)
             validated = false
-        elseif context then
+        elseif IsValid(context) then
             context:Process(false)
         end
 
@@ -736,7 +742,7 @@ function SWEP:IdleLogic()
     local chaining = false
 
     local ctx = self:GetContext()
-    if ctx then
+    if IsValid(ctx) then
         ctx:SetDebug(self:GetDebug())
     end
 
@@ -992,7 +998,7 @@ function SWEP:Calculate(active)
             self:SetHoldType("idle")
         end
         
-        if self:GetDrag() or self:GetContext() then
+        if self:GetDrag() or IsValid(self:GetContext()) then
             local first = cursors[1]
             if first then
                 first.idle_temp = false

@@ -76,7 +76,6 @@ do
 end
 
 function ENT:SetupPhysics()
-    self:SetMoveType(MOVETYPE_NONE)
     if SERVER then self:SetUseType(SIMPLE_USE) end
     self:PhysicsInit(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -104,10 +103,6 @@ function ENT:SetupDataTables()
 
     self:NetworkVar("Float", 4, "Redirected") -- damage block feature
     self:NetworkVar("Vector", 0, "Redirection")
-    
-    self:NetworkVar("Bool", 4, "Zipped")
-    self:NetworkVar("Vector", 1, "ZippedMin")
-    self:NetworkVar("Vector", 2, "ZippedMax")
 
     if SERVER then
         self:SetLives(self.CVAR_Lives:GetInt())
@@ -185,10 +180,6 @@ function ENT:OnRemove()
             break
         end
     end
-
-    if self.zip then
-        self:UnZipify()
-    end
 end
 
 function ENT:Think()
@@ -225,6 +216,10 @@ function ENT:Think()
 
     if self:GetMoveType() ~= MOVETYPE_VPHYSICS then
         self:SetMoveType(MOVETYPE_VPHYSICS)
+    end
+
+    if self:GetCollisionGroup() ~= COLLISION_GROUP_WORLD then
+        self:SetMoveType(COLLISION_GROUP_WORLD)
     end
 
     local phys = self:GetPhysicsObject()

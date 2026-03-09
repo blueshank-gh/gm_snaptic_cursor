@@ -49,8 +49,9 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Bool", 3, "Auto")
 
     -- Drag
-    self:NetworkVar("Entity", 0, "DragCursor")
-	self:NetworkVar("Entity", 1, "DragEntity")
+	self:NetworkVar("Entity", 0, "Context")
+    self:NetworkVar("Entity", 1, "DragCursor")
+	self:NetworkVar("Entity", 2, "DragEntity")
 	self:NetworkVar("Int", 0, "DragPhysBone")
 	self:NetworkVar("Vector", 0, "DragLocalPos")
 	self:NetworkVar("Angle", 0, "DragLocalAng")
@@ -237,6 +238,11 @@ if SERVER then -- Context
     AddCSLuaFile("context/shared.lua")
 end
 include("context/shared.lua")
+
+if SERVER then -- Archive
+    AddCSLuaFile("archive/shared.lua")
+end
+include("archive/shared.lua")
 
 if SERVER then -- Cursor
     AddCSLuaFile("cursor/shared.lua")

@@ -77,20 +77,6 @@ do
             material = self.Types.hand_open
         end
 
-        if self:GetZipped() then
-            local scale = owner:GetModelScale()
-            local angle = ct * -60
-            local rad = math.rad(angle)
-            local x = math.cos(rad) * ((size/4) + 2.5 * scale)
-            local y = math.sin(rad) * ((size/4) + 2.5 * scale)
-            local wish = position + Vector(x, y, 0)
-
-            cam.IgnoreZ(ignorez)
-            render.SetMaterial(package_material)
-            render.DrawSprite(wish, size/5, size/5, color_white)
-            cam.IgnoreZ(false)
-        end
-
         if self:GetImmunity() > ct then
             color = Color(255, 0, 0)
             local rnd = self.Types_RND

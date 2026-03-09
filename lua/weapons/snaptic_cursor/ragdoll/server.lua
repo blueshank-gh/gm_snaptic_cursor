@@ -284,7 +284,7 @@ hook.Add("StartCommand", "Snaptic_Ragdoll", function(invoker, cmd)
 
         EmitSound("Flesh.ImpactSoft", ragdoll:GetPos())
 
-        if ragdoll.pressed_count > 1/(engine.TickInterval() * Ragdoll.CVAR_Ragdoll_Struggle:GetFloat()) then
+        if ragdoll.pressed_count > (1/engine.TickInterval()) * Ragdoll.CVAR_Ragdoll_Struggle:GetFloat() then
             Ragdoll.Stop(invoker)
         end
     end

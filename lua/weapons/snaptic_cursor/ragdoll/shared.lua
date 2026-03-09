@@ -3,10 +3,10 @@ Snaptic.Ragdoll = Ragdoll
 
 Ragdoll.CVAR_Ragdoll_Struggle = CreateConVar(
     "snaptic_cursor_ragdoll_struggle",
-    "1",
+    "0.5",
     { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
     "How long (in seconds, tick-based) a player can keyboard mash before breaking free from ragdoll.",
-    0, 5
+    0, 60
 )
 
 function Ragdoll.GetController(entity)
