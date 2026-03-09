@@ -255,7 +255,7 @@ hook.Add("Think", "Snaptic_Ragdoll", function()
             if observer_target ~= v.Snaptic_Spectating then
                 Ragdoll.Spectate(v, v.Snaptic_Spectating)
             end
-            v:SetPos(observer_target:GetPos())
+            v:SetPos(v.Snaptic_Spectating:GetPos())
         end
     end
 end)
