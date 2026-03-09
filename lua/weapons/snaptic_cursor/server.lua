@@ -15,6 +15,17 @@ function SWEP:CreateCursor()
     return cursor
 end
 
+function SWEP:CleanCursors()
+    local cursors = self.Cursors
+    for i=1, #cursors do
+        local cursor = cursors[i]
+        if IsValid(cursor) then
+            cursor:Remove()
+        end
+    end
+    self.Cursors = {}
+end
+
 function SWEP:CreateContext(cursor, target)
     self:ContextRelease()
     if hook.Run("Snaptic.Context", self:GetOwner(), self, target) == false then
@@ -980,7 +991,7 @@ function SWEP:Calculate(active)
     for i=1, #cursors do
         local cursor = cursors[i-c]
         if not IsValid(cursor) then
-            table.remove(cursor, i-c) c = c + 1
+            table.remove(cursors, i-c) c = c + 1
             cursors[cursor] = nil
             continue
         end
@@ -1035,6 +1046,15 @@ end
 function SWEP:Think()
     local owner = self:GetOwner()
     if not IsValid(owner) then return end
+
+    local operators = Snaptic.Operators
+    if not operators[self] then
+        operators[#operators+1] = self
+        operators[self] = true
+        self:CleanCursors()
+        for i=1, 3 do self:CreateCursor() end
+    end
+
     local dragging = self:GetDragEntity()
     if dragging and not self.dragging_debounce then
         local wheel = owner:GetCurrentCommand():GetMouseWheel()
@@ -1059,6 +1079,21 @@ function SWEP:Think()
         end
     end
 end
+
+hook.Add("PostCleanupMap", "Snaptic.Regenerate", function()
+    local operators = Snaptic.Operators
+    local c = 0
+    for i=1, #operators do
+        local operator = operators[i-c]
+        if not IsValid(operator) then
+            table.remove(operators, i-c) c = c + 1
+            operators[operator] = nil
+            continue
+        end
+        operator:CleanCursors()
+        for i=1, 3 do operator:CreateCursor() end
+    end
+end)
 
 hook.Add("Think", "Snaptic.Hibernate", function()
     local operators = Snaptic.Operators

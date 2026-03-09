@@ -150,7 +150,7 @@ function ENT:Decompress(position, angle)
                 if entry and IsValid(entry.__ownership) then
                     undo.AddEntity(ent)
                     owner:AddCleanup("duplicates", ent)
-                else
+                elseif ent.CPPISetOwner then
                     ent:Remove()
                 end
             end

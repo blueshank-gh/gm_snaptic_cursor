@@ -40,7 +40,7 @@ function ENT:SetupPhysics()
     self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 end
 
-ENT.RenderTextWidth = 13
+ENT.RenderTextWidth = 11.5
 ENT.RenderTextHeight = 24
 ENT.RenderScale = 0.175
 ENT.RenderSpacing = 1
@@ -254,7 +254,8 @@ function ENT:Populate()
             self:AddSpacer()
 
             if not entity.Snaptic then
-                self:AddOption("Extract", function(invoker, operator, context, cursor, target)
+                -- disabled for now, we need a better way to perform file storage.
+                --[[self:AddOption("Extract", function(invoker, operator, context, cursor, target)
                     do
                         local materials = target:GetMaterials()
                         for i=1, #materials do
@@ -338,7 +339,7 @@ function ENT:Populate()
                         target:SetModel("error.mdl")
                     end
                     context:Close()
-                end, "database_go")
+                end, "database_go")]]
                 
                 self:AddOption("Dismantle", function(invoker, operator, context, cursor, target)
                     operator.Helpers.Extract(target, operator)

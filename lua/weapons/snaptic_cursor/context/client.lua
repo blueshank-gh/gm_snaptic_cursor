@@ -45,7 +45,7 @@ do
                 local option = options[i]
                 local type = option.type
                 if option.type == "option" then
-                    local tw, th = surface.GetTextSize(option.name)
+                    local tw, th = self.RenderTextWidth * #option.name, self.RenderTextHeight//surface.GetTextSize(option.name)
                     if option.icon then
                         tw = tw + 16 + 4
                     end
