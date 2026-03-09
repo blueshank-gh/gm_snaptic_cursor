@@ -62,6 +62,26 @@ function ENT:Compress(target, trace)
         self:SetPlayer(target)
         self:SetMin(target:OBBMins())
         self:SetMax(target:OBBMaxs())
+        local phys = self:GetPhysicsObject()
+        if IsValid(phys) then
+            local phys_target = target:GetPhysicsObject()
+            if IsValid(phys_target) then
+                local entities = target:GetWeapons()
+                local total_mass = phys_target:GetMass()
+                for k, v in pairs(entities) do
+                    local phys = v:GetPhysicsObject()
+                    if IsValid(phys) then
+                        total_mass = total_mass + phys:GetMass()
+                    else
+                        total_mass = total_mass + 40
+                    end
+                end
+                phys:SetMass(math.min(50000, total_mass))
+                self:SetSize(total_mass)
+                self:SetFiles(table.Count(entities) + 1)
+                self:SetFolders(1)
+            end
+        end
     else
         local operator = self:GetOperator()
         if not IsValid(operator) then return false end
@@ -77,16 +97,28 @@ function ENT:Compress(target, trace)
         local min, max = duplicator.WorkoutSize(duplication.Entities)
         self:SetMin(min)
         self:SetMax(max)
+        local total_mass = 10
         for k, v in pairs(duplication.Entities) do
             local ent = Entity(k)
             if IsValid(ent) then
                 if ent.CPPIGetOwner then
                     v.__ownership = ent:CPPIGetOwner()
                 end
+                local phys = ent:GetPhysicsObject()
+                if IsValid(phys) then
+                    total_mass = total_mass + phys:GetMass()
+                end
                 ent:Remove()
             end
         end
         self.duplication = duplication
+        local phys = self:GetPhysicsObject()
+        if IsValid(phys) then
+            phys:SetMass(math.min(50000, total_mass))
+            self:SetSize(total_mass)
+            self:SetFiles(table.Count(duplication.Entities))
+            self:SetFolders(math.Round(table.Count(duplication.Constraints) / table.Count(duplication.Entities)))
+        end
     end
     self:SetActive(true) -- TODO: don't think this is really necessary?
     self:EmitSound("snaptic/apple_pay.mp3")

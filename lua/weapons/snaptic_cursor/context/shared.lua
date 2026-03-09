@@ -186,13 +186,6 @@ function ENT:Populate()
             end, "user_delete")
         end
 
-        if entity:GetClass() == "snaptic_archive" then
-            self:AddOption("UnArchive", function(invoker, operator, context, cursor, target)
-                entity:Remove()
-                context:Close()
-            end, "package_delete")
-        end
-
         if entity:IsPlayer() then
             self:AddOption("Heal", function(invoker, operator, context, cursor, target)
                 target:SetHealth(math.max(target:Health(), target:GetMaxHealth()))
@@ -248,8 +241,7 @@ function ENT:Populate()
                         context:Close()
                     end, "collision_off")
                 end
-
-                if gamemode.Call("CanProperty", invoker, "remover", entity) then
+                if gamemode.Call("CanProperty", invoker, "remover", entity) or entity:GetClass() == "snaptic_archive" then
                     self:AddOption("Remove", function(invoker, operator, context, cursor, target)
                         if not properties.CanBeTargeted(target, invoker) or not gamemode.Call("CanProperty", invoker, "remover", entity) then return end
                         context:Close()
@@ -268,13 +260,13 @@ function ENT:Populate()
                     obb:Rotate(target:GetAngles())
                     archive:SetPos(target:GetPos() + obb)
                     archive:SetAngles(target:GetAngles())
+                    archive:Activate()
+                    archive:Spawn()
                     if not archive:Compress(target, operator.Trace) then
                         archive:Remove()
                         context:Close()
                         return
                     end
-                    archive:Activate()
-                    archive:Spawn()
                     local phys = archive:GetPhysicsObject()
                     if IsValid(phys) then
                         phys:EnableMotion(true)
@@ -287,6 +279,11 @@ function ENT:Populate()
                     end
                     context:Close()
                 end, "package_add")
+            else
+                self:AddOption("UnArchive", function(invoker, operator, context, cursor, target)
+                    entity:Remove()
+                    context:Close()
+                end, "package_delete")
             end
 
             self:AddOption("Boxify", function(invoker, operator, context, cursor, target)

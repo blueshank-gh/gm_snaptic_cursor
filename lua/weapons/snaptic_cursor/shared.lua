@@ -175,6 +175,7 @@ function SWEP:CanDrag(entity)
             return true
         end
     end
+    if entity:GetClass() == "snaptic_archive" then return true end
     if entity.CPPIGetOwner then
         if entity:CPPIGetOwner() ~= owner then
             return hook.Run("PhysgunPickup", owner, entity)

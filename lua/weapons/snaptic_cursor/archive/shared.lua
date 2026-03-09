@@ -9,7 +9,7 @@ else
 end
 
 ENT.Type = "anim"
-ENT.PrintName		= "Snaptic's Archive File"
+ENT.PrintName		= "WinRAR"
 ENT.Spawnable		= false
 ENT.AdminSpawnable	= false
 ENT.Category		= "Other"
@@ -36,6 +36,9 @@ function ENT:SetupDataTables()
     self:NetworkVar("Bool", "Active")
     self:NetworkVar("Vector", "Min")
     self:NetworkVar("Vector", "Max")
+    self:NetworkVar("Int", "Size")
+    self:NetworkVar("Int", "Files")
+    self:NetworkVar("Int", "Folders")
     if SERVER then
         self:SetDebug(false)
     end

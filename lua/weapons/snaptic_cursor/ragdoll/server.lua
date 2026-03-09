@@ -11,6 +11,7 @@ function Ragdoll.Spectate(invoker, entity)
 	invoker.Snaptic_Ragdoll_Weapon = invoker:GetActiveWeapon()
     invoker.Snaptic_Spectating = entity
 	invoker:SetActiveWeapon()
+    invoker:SetPos(entity:GetPos())
 end
 
 function Ragdoll.UnSpectate(invoker)
@@ -143,8 +144,8 @@ end)
 hook.Add("PlayerDeath", "Snaptic_Ragdoll", function(victim, inflictor, attacker)
     local ragdoll = Ragdoll.GetRagdoll(victim)
     if not IsValid(ragdoll) then return end
-    
     Ragdoll.UnSpectate(victim)
+    victim:SetPos(ragdoll:GetPos())
     victim:Dissolve()
     victim:SetNW2Entity("snaptic.ragdoll", nil)
     ragdoll:SetNW2Entity("snaptic.ragdoll", nil)
@@ -171,6 +172,7 @@ hook.Add("PlayerSilentDeath", "Snaptic_Ragdoll", function(victim)
     if not IsValid(ragdoll) then return end
 
     Ragdoll.UnSpectate(victim)
+    victim:SetPos(ragdoll:GetPos())
     victim:SetNW2Entity("snaptic.ragdoll", nil)
     ragdoll:SetNW2Entity("snaptic.ragdoll", nil)
 
@@ -249,8 +251,12 @@ hook.Add("Think", "Snaptic_Ragdoll", function()
 
     for k, v in player.Iterator() do
         if v.Snaptic_Spectating and IsValid(v.Snaptic_Spectating) then
-            if v:GetObserverTarget() ~= v.Snaptic_Spectating then
-                Ragdoll.Spectate(v, v.Snaptic_Spectating)
+            local observer_target = v:GetObserverTarget()
+            if IsValid(observer_target) then
+                if observer_target ~= v.Snaptic_Spectating then
+                    Ragdoll.Spectate(v, v.Snaptic_Spectating)
+                end
+                v:SetPos(observer_target:GetPos())
             end
         end
     end
