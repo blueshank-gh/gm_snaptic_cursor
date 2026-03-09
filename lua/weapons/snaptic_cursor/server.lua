@@ -527,11 +527,13 @@ do -- DragLogic
         end
         local validated = self:CanDrag(target)
         local context = self:GetContext()
-        if context == tr.Entity then
-            context:Process(tr.HitPos)
-            validated = false
-        elseif IsValid(context) then
-            context:Process(false)
+        if IsValid(context) then
+            if context == tr.Entity then
+                context:Process(tr.HitPos)
+                validated = false
+            else
+                context:Process(false)
+            end
         end
 
         if cursor:GetImmunity() > CurTime() then
