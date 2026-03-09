@@ -611,7 +611,8 @@ do -- DragLogic
         end
 
         if SERVER then
-            if IsValid(tr.Entity) and usable[tr.Entity:GetClass()] then
+            local class = tr.Entity:GetClass()
+            if IsValid(tr.Entity) and (usable[class] or string.find(class, "button", 1, true) or string.find(class, "door", 1, true)) then
                 cursor:SetType("link")
             end
 
@@ -671,7 +672,7 @@ do -- DragLogic
             end
 
             local click_state = owner:KeyDown(IN_ATTACK)
-            if click_state ~= self.double_click_state and cursor:GetType() == "link" then
+            if click_state ~= self.double_click_state and IsValid(tr.Entity) and (usable[class] or string.find(class, "button", 1, true) or string.find(class, "door", 1, true)) then
                 self.double_click_state = click_state
                 if click_state then
                     local st = SysTime()
