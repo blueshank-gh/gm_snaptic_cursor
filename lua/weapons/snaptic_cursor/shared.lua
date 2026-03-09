@@ -197,10 +197,14 @@ hook.Add("FindUseEntity", "Snaptic.Use", function(invoker, entity)
     if not IsValid(operator) then return end
     local active = invoker:GetActiveWeapon()
     if operator:GetAlways() or active == operator then
+        if operator:IsDragging() then
+            return game.GetWorld() -- may not be a good idea...?
+        end
+
         local ep = invoker:GetShootPos()
         local tr = operator:TraceLine({
             start = ep,
-            endpos = ep + invoker:GetAimVector() * 72,
+            endpos = ep + invoker:GetAimVector() * (72 + 32),
         })
 
         local target = tr.Entity

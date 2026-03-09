@@ -40,6 +40,7 @@ do
         if not IsValid(operator) then return end
         local position = self:GetPredictedPos() + self:OBBCenter()
         local owner = operator:GetOwner()
+        if not IsValid(owner) then return end
 
         -- raw blending via interpolation
         self.position_blended = LerpVector(ft * (1/tr)/3, self.position_blended or position, position)

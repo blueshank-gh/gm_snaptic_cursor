@@ -328,7 +328,7 @@ do -- DragLogic
             maxspeeddamp = 10000,
             dampfactor = 0.8,
             teleportdistance = 0,
-            deltatime = FrameTime()
+            deltatime = engine.TickInterval()
         }
 
         local current_velocity = entity:GetVelocity()
@@ -1046,6 +1046,10 @@ hook.Add("Think", "Snaptic.Hibernate", function()
 
         if not spectate and (operator:GetAlways() or state) then
             operator:Calculate(state)
+            if not operators[operator] then
+                c = c + 1
+                continue
+            end
         end
 
         if state ~= operator.Active then
