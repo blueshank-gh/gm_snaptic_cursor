@@ -26,20 +26,17 @@ function ENT:Think()
     self:NextThink(ct)
     
     if not IsValid(operator) or not operator:IsWeapon() then
-        print(1)
         self:Remove()
         return
     end
 
     local owner = operator:GetOwner()
     if not IsValid(owner) then
-        print(2)
         self:Remove()
         return
     end
 
     if not self:Validate() then
-        print(3)
         self:Remove()
         return
     end
