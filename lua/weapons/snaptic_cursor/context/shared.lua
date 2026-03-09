@@ -154,8 +154,8 @@ function ENT:Populate()
             for i=1, #cursors do
                 local cursor = cursors[i]
                 if IsValid(cursor) then
-                    cursor:SetDurability(cursor.MaxDurability)
-                    cursor:SetLives(cursor.MaxLives)
+                    cursor:SetDurability(cursor.CVAR_Durability:GetFloat())
+                    cursor:SetLives(cursor.CVAR_Lives:GetInt())
                 end
             end
         end, "heart_add")

@@ -36,10 +36,44 @@ for k, v in pairs(ENT.Types) do
     ENT.Types_RND[#ENT.Types_RND+1] = k
 end
 
--- TODO: we should make this a CVAR instead
-ENT.MaxLives = 4
-ENT.MaxDurability = 2000
-ENT.DurabilityRegen = 250
+do
+    ENT.CVAR_Lives = CreateConVar(
+        "snaptic_cursor_lives", "4",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Maximum number of i-frame lives for the cursors.",
+        1, 10
+    )
+
+    ENT.CVAR_Durability = CreateConVar(
+        "snaptic_cursor_durability", "2000",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCARF_NOTIFY },
+        "Maximum durability of the cursors.",
+        100, 100000
+    )
+
+    ENT.CVAR_DurabilityRegen = CreateConVar(
+        "snaptic_cursor_durabilityregen", "250",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "How much durability is restored each regeneration tick.",
+        1, 100000
+    )
+
+    ENT.CVAR_RegenCooldown = CreateConVar(
+        "snaptic_cursor_regencooldown",
+        "10",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Delay (in seconds) before durability regeneration can begin.",
+        0, 60
+    )
+
+    ENT.CVAR_RegenDelay = CreateConVar(
+        "snaptic_cursor_regendelay",
+        "5",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "How often (in seconds) a regeneration tick occurs.",
+        0, 60
+    )
+end
 
 function ENT:SetupPhysics()
     self:SetMoveType(MOVETYPE_NONE)
@@ -72,8 +106,8 @@ function ENT:SetupDataTables()
     self:NetworkVar("Vector", 0, "Redirection")
 
     if SERVER then
-        self:SetLives(self.MaxLives)
-        self:SetDurability(self.MaxDurability)
+        self:SetLives(self.CVAR_Lives:GetInt())
+        self:SetDurability(self.CVAR_Durability:GetFloat())
         self:SetType("arrow")
         self:SetSize(20)
         self:SetDebug(false)
@@ -199,8 +233,8 @@ function ENT:Think()
     end
 
     if SERVER then
-        if not self.last_damage or self.last_damage + 10 < ct then
-            if not self.last_regenerate or self.last_regenerate + 5 < ct then
+        if not self.last_damage or self.last_damage + self.CVAR_RegenCooldown:GetFloat() < ct then
+            if not self.last_regenerate or self.last_regenerate + self.CVAR_RegenDelay:GetFloat() < ct then
                 self:Regenerate()
                 self.last_regenerate = ct
             end

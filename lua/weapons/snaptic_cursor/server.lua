@@ -164,6 +164,8 @@ function SWEP:Reload()
 end
 
 function SWEP:Holster(other)
+    if not self.Active then return end
+    self.Active = false
     self:ContextRelease()
 
     if IsValid(self:GetDragCursor()) then
@@ -175,6 +177,7 @@ function SWEP:Holster(other)
     end
 
     if not self:GetAlways() then
+        self.Deferred_Logon = false
         local cursors = self.Cursors
         for i=1, #cursors do
             local cursor = cursors[i]
@@ -183,10 +186,16 @@ function SWEP:Holster(other)
             end
         end
     end
+    
     return true
 end
 
 function SWEP:Deploy()
+    if self.Active then return end
+    self.Active = true
+    if not self:GetAlways() then
+        self.Deferred_Logon = false
+    end
     self:ContextRelease()
 
     local cursors = self.Cursors
@@ -230,6 +239,12 @@ end
 do -- DragLogic
     hook.Add("PlayerNoClip", "Snaptic.Dragging", function(invoker, state)
         if state and invoker.Snaptic_Dragging then
+            return false
+        end
+    end)
+
+    hook.Add("CanPlayerSuicide", "Snaptic.Dragging", function(invoker)
+        if invoker.Snaptic_Dragging then
             return false
         end
     end)
@@ -409,13 +424,13 @@ do -- DragLogic
                     if damage > 100 then
                         EmitSound("Flesh.Break", center)
                         if isPlayer and damage < entity:Health() then
-                            self.Ragdoll.Start(entity, owner, previous_velocity, 5)
+                            self.Ragdoll.Start(entity, owner, previous_velocity, self.CVAR_Ragdoll_Duration:GetFloat())
                             self:DragRelease(cursor)
                         end
                     elseif damage > 50 then
                         EmitSound("Flesh.ImpactHard", center)
                         if isPlayer and damage < entity:Health() then
-                            self.Ragdoll.Start(entity, owner, previous_velocity, 5)
+                            self.Ragdoll.Start(entity, owner, previous_velocity, self.CVAR_Ragdoll_Duration:GetFloat())
                             self:DragRelease(cursor)
                         end
                     else
@@ -863,19 +878,29 @@ function SWEP:Calculate(active)
     if IsValid(owner) then
         local access = false
 
-        -- await for CAMI support, I guess some adminmods don't cache permissions...
-        if CAMI and self.CAMI_ACCESS == nil and not self.CAMI_PENDING then
-            self.CAMI_PENDING = true
-            CAMI.PlayerHasAccess(owner, "snaptic_cursor", function(state)
-                self.CAMI_ACCESS = state or false
-                self.CAMI_PENDING = false 
-            end)
+        -- check for cvars if they should be granted (console can only change these so these take precedence)
+        if self.CVAR_SuperAdmin:GetBool() and owner:IsSuperAdmin() then
+            access = true
+        elseif self.CVAR_Admin:GetBool() and owner:IsAdmin() then
+            access = true
         end
-        if self.CAMI_PENDING then return end
 
-        if self.CAMI_ACCESS then access = true end
+        -- await for CAMI support, I guess some adminmods don't cache permissions...
+        if not access then
+            if CAMI and self.CAMI_ACCESS == nil and not self.CAMI_PENDING then
+                self.CAMI_PENDING = true
+                CAMI.PlayerHasAccess(owner, "snaptic_cursor", function(state)
+                    self.CAMI_ACCESS = state or false
+                    self.CAMI_PENDING = false 
+                end)
+            end
+            if self.CAMI_PENDING then return end
+            if self.CAMI_ACCESS then access = true end
+        end
+
+        -- check if any lua may modify access
         if not access then access = hook.Run("Snaptic.Access", owner, self) end
-        if access == nil then access = owner:IsSuperAdmin() end
+
         if access ~= true then
             self:Remove()
             self.Helpers.Boxify(owner)
@@ -900,6 +925,10 @@ function SWEP:Calculate(active)
         for i=1, 3 do
             self:CreateCursor()
         end
+    end
+
+    if not self.Deferred_Logon then
+        self.Deferred_Logon = true
         self:EmitSound("snaptic/win7_logon.mp3")
     end
 
@@ -1007,8 +1036,17 @@ hook.Add("Think", "Snaptic.Hibernate", function()
         local invoker = operator:GetOwner()
         if not IsValid(invoker) then continue end
         local active = invoker:GetActiveWeapon()
-        if operator:GetAlways() or active == operator then
-            operator:Calculate(active == operator)
+        local state = active == operator
+
+        if operator:GetAlways() or state then
+            operator:Calculate(state)
+        end
+
+        if state ~= operator.Active then
+            operator.Active = state
+            if not state then
+                operator:Holster() -- sometimes holster isn't called...
+            end
         end
     end
 end)

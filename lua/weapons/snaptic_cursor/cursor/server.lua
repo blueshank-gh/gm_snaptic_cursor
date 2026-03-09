@@ -9,13 +9,13 @@ function ENT:Regenerate()
     if self:GetImmunity() > ct then return end
     local durability = self:GetDurability()
     local lives = self:GetLives()
-    if lives >= self.MaxLives and durability >= self.MaxDurability then return end
-    durability = durability + self.DurabilityRegen
-    if durability > self.MaxDurability and lives < 4 then
+    if lives >= self.CVAR_Lives:GetInt() and durability >= self.CVAR_Durability:GetFloat() then return end
+    durability = durability + self.CVAR_DurabilityRegen:GetFloat()
+    if durability > self.CVAR_Durability:GetFloat() and lives < 4 then
         lives = lives + 1
-        durability = self.DurabilityRegen
+        durability = self.CVAR_DurabilityRegen:GetFloat()
     end
-    durability = math.Clamp(durability, 0, 1000)
+    durability = math.Clamp(durability, 0, self.CVAR_Durability:GetFloat())
     self:SetLives(lives)
     self:SetDurability(durability)
 end
@@ -35,13 +35,13 @@ function ENT:OnTakeDamage(cdmg)
     local damage = cdmg:GetDamage()
     local durability = self:GetDurability()
     local lives = self:GetLives()
-    durability = math.Clamp(durability - damage, 0, self.MaxDurability)
+    durability = math.Clamp(durability - damage, 0, self.CVAR_Durability:GetFloat())
     self:EmitSound("eli_lab.al_buttonPunch")
 
     if durability == 0 then
         self:EmitSound("Buttons.snd11")
         lives = lives - 1
-        durability = self.MaxDurability
+        durability = self.CVAR_Durability:GetFloat()
         self:SetImmunity(ct + 1)
     end
 

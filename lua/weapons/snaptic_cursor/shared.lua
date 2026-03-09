@@ -111,12 +111,61 @@ function SWEP:TraceLine(options, invoker, ...)
     return tr
 end
 
+do
+    SWEP.CVAR_SuperAdmin = CreateConVar(
+        "snaptic_cursor_superadmin",
+        "1",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Allows superadmins to use the cursors.",
+        0, 1
+    )
+
+    SWEP.CVAR_SuperAdmin_Players = CreateConVar(
+        "snaptic_cursor_superadmin_players",
+        "1",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Allows superadmins to target all players regardless.",
+        0, 1
+    )
+
+    SWEP.CVAR_Admin = CreateConVar(
+        "snaptic_cursor_admin",
+        "0",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Allows admins to use the cursors.",
+        0, 1
+    )
+
+    SWEP.CVAR_Admin_Players = CreateConVar(
+        "snaptic_cursor_admin_players",
+        "0",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Allows admins to target all players regardless.",
+        0, 1
+    )
+
+    SWEP.CVAR_Ragdoll_Duration = CreateConVar(
+        "snaptic_cursor_ragdoll_duration",
+        "5",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "How long (in seconds) a player can be stuck in ragdoll after being dunked on.",
+        1, 60
+    )
+end
+
 function SWEP:CanDrag(entity)
     if not IsValid(entity) then return false end
     local owner = self:GetOwner()
     local interaction = hook.Run("Snaptic.Interact", owner, self, entity)
     if interaction ~= nil then return interaction end
     if entity == owner then return true end
+    if entity:IsPlayer() then
+        if owner:IsAdmin() and self.CVAR_Admin_Players:GetBool() then
+            return true
+        elseif owner:IsSuperAdmin() and self.CVAR_SuperAdmin_Players:GetBool() then
+            return true
+        end
+    end
     if entity.CPPIGetOwner then
         if entity:CPPIGetOwner() ~= owner then
             return hook.Run("PhysgunPickup", owner, entity)

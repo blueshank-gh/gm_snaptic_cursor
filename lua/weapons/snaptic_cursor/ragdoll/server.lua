@@ -171,6 +171,12 @@ hook.Add("PlayerDisconnected", "Snaptic_Ragdoll", function(invoker)
 	ragdoll:Remove()
 end)
 
+hook.Add("CanPlayerSuicide", "Snaptic_Ragdoll", function(invoker)
+    local ragdoll = Ragdoll.GetRagdoll(invoker)
+	if not ragdoll then return end
+    return false
+end)
+
 hook.Add("Think", "Snaptic_Ragdoll", function()
     local st = SysTime()
     local r = Ragdoll.registry
@@ -221,7 +227,7 @@ hook.Add("StartCommand", "Snaptic_Ragdoll", function(invoker, cmd)
 
         EmitSound("Flesh.ImpactSoft", ragdoll:GetPos())
 
-        if ragdoll.pressed_count > 1/engine.TickInterval() then
+        if ragdoll.pressed_count > 1/(engine.TickInterval() * Ragdoll.CVAR_Ragdoll_Struggle:GetFloat()) then
             Ragdoll.Stop(invoker)
         end
     end

@@ -20,6 +20,20 @@ Do note: cursors do take damage, once you run out of cursors completely, you are
 ## Spawn Permissions
 Snaptic's spawnability is based on your administration level, to access the cursor you should be at the `:IsSuperAdmin()` level, however you can change this if the admin-mod being used supports `CAMI` or via the developer guide.
 
+## Console Variables
+List of console variables that can be changed on the server.
+- `snaptic_cursor_superadmin` (default: 1) - Allows superadmins to use the cursors.
+- `snaptic_cursor_superadmin_players` (default: 1) - Allows superadmins to target all players regardless.
+- `snaptic_cursor_admin` (default: 0) - Allows admins to use the cursors.
+- `snaptic_cursor_admin_players` (default: 0) - Allows admins to target all players regardless.
+- `snaptic_cursor_ragdoll_duration` (default: 5) - How long (in seconds) a player can be stuck in ragdoll after being dunked on.
+- `snaptic_cursor_ragdoll_struggle` (default: 1) - How long (in seconds, tick-based) a player can keyboard mash before breaking free from ragdoll.
+- `snaptic_cursor_lives` (default: 4) - Maximum number of i-frame lives for the cursors.
+- `snaptic_cursor_durability` (default: 2000) - Maximum durability of the cursors.
+- `snaptic_cursor_durabilityregen` (default: 250) - How much durability is restored each regeneration tick.
+- `snaptic_cursor_regencooldown` (default: 10) - Delay (in seconds) before durability regeneration can begin.
+- `snaptic_cursor_regendelay` (default: 5) - How often (in seconds) a regeneration tick occurs.
+
 ## Upcoming (at my discretion)
 - Sub-menu contexts - allows for infinitely expanding context menu.
 - Cursor physics - cursors inflict damage and force upon just moving it over something.
@@ -35,9 +49,9 @@ Snaptic's spawnability is based on your administration level, to access the curs
 By default Snaptic's Cursor will check for `:IsSuperAdmin()` as a last resort.\
 The chain of precedence goes as follows:
 ```
-1. CAMI - Administration standard and access control.
-2. Snaptic.Access - Hook access convention. (if this is `nil` the next stage is checked)
-3. IsSuperAdmin - Finalized check, failure will boxify the player and run `:KillSilent()`.
+1. CVAR - snaptic_cursor_admin and snaptic_cursor_superadmin check.
+2. CAMI - Administration standard and access control.
+3. Snaptic.Access - Hook access convention. (if this is `nil` the next stage is checked, if any)
 ```
 Additional support for addons are welcome, simply request by making a tracker issue.
 
