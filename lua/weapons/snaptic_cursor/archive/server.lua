@@ -118,9 +118,6 @@ function ENT:Decompress(position, angle)
                 if entry and IsValid(entry.__ownership) then
                     undo.AddEntity(ent)
                     owner:AddCleanup("duplicates", ent)
-                    if ent.CPPISetOwner then
-                        ent:CPPISetOwner(entry.__ownership)
-                    end
                 else
                     ent:Remove()
                 end
@@ -128,6 +125,16 @@ function ENT:Decompress(position, angle)
             undo.SetPlayer(owner)
             undo.SetCustomUndoText("Undone #undo.duplication")
         undo.Finish("#undo.duplication (" .. tostring(table.Count(entities)) ..  ")")
+        
+        -- for some reason some prop protections need this to be after...
+        for k, ent in pairs(entities) do
+            local entry = duplication.Entities[k]
+            if entry and IsValid(entry.__ownership) then
+                if ent.CPPISetOwner then
+                    ent:CPPISetOwner(entry.__ownership)
+                end
+            end
+        end
     end
 
     self:EmitSound("snaptic/apple_pay.mp3")
