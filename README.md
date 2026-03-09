@@ -27,6 +27,7 @@ Snaptic's spawnability is based on your administration level, to access the curs
 ## Special Thanks
 - BuildStruct - literally a dev-land, and for me to... boxify people against their will.
 - BuildStruct Developers - screaming at me about errors from this thing.
+- Bonyoze - Some physgun code replication based on newtonian physgun.
 
 # Developer Guide
 
