@@ -102,6 +102,13 @@ function ENT:Zipify(target)
         local operator = self:GetOperator()
         if not IsValid(operator) then return end
         local owner = operator:GetOwner()
+        local tr = self:TraceLine({
+            start = self:GetPos(),
+            endpos = target:GetPos() + target:OBBCenter(),
+            mask = MASK_SHOT
+        })
+        local state = hook.Run("CanTool", owner, tr, "duplicator", operator, IN_ATTACK2)
+        if state == false then return end
         duplicator.SetLocalAng(Angle(0,self:GetAngles().y,0))
         local vec = self:GetPos()
         vec.z = owner:GetPos().z
