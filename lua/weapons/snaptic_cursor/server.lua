@@ -850,6 +850,8 @@ function SWEP:OnDamage(cdmg)
     local width = math.min(obb.x, obb.y) + 15
     local attacker = cdmg:GetAttacker()
 
+    self:SetBalance(ct)
+
     if position:Distance(center) > 50 then
         if IsValid(attacker) then
             local invoker_position = attacker:EyePos()

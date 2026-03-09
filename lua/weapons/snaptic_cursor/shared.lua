@@ -57,6 +57,7 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Vector", 0, "DragLocalPos")
 	self:NetworkVar("Angle", 0, "DragLocalAng")
 	self:NetworkVar("Float", 0, "DragDistance")
+    self:NetworkVar("Float", 1, "Balance") -- block certain feature
 
     if SERVER then
         self:SetDebug(false)
@@ -162,6 +163,14 @@ do
         0, 1
     )
 
+    SWEP.CVAR_Balance = CreateConVar(
+        "snaptic_cursor_balance",
+        "0",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Disables certain features in seconds when taking damage.",
+        0, 60 * 60
+    )
+
     SWEP.CVAR_Damage = CreateConVar(
         "snaptic_cursor_damage",
         "100",
@@ -209,6 +218,10 @@ do
         "Rate at which constant damage is applied in milliseconds.",
         0, 10000
     )
+end
+
+function SWEP:InBalance()
+    return self:GetBalance() + self.CVAR_Balance:GetFloat() > SysTime()
 end
 
 function SWEP:CanDrag(entity)

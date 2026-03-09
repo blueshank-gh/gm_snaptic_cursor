@@ -147,27 +147,29 @@ function ENT:Populate()
             operator:SetAuto(not operator:GetAuto())
             context:Close()
         end, operator:GetAuto() and "accept" or "stop")
-        self:AddSpacer()
-        self:AddOption("Heal Cursors", function(invoker, operator, context, cursor, target)
-            local cursors = operator.Cursors
-            for i=1, #cursors do
-                local cursor = cursors[i]
-                if IsValid(cursor) then
-                    cursor:SetDurability(cursor.CVAR_Durability:GetFloat())
-                    cursor:SetLives(cursor.CVAR_Lives:GetInt())
+        if not operator:InBalance() then
+            self:AddSpacer()
+            self:AddOption("Heal Cursors", function(invoker, operator, context, cursor, target)
+                local cursors = operator.Cursors
+                for i=1, #cursors do
+                    local cursor = cursors[i]
+                    if IsValid(cursor) then
+                        cursor:SetDurability(cursor.CVAR_Durability:GetFloat())
+                        cursor:SetLives(cursor.CVAR_Lives:GetInt())
+                    end
                 end
-            end
-        end, "heart_add")
-        self:AddOption("Add Cursor", function(invoker, operator, context, cursor, target)
-            if #operator.Cursors < 10 then
-                operator:CreateCursor()
-            end
-        end, "add")
-        self:AddOption("Remove Cursor", function(invoker, operator, context, cursor, target)
-            if #operator.Cursors > 1 then
-                operator.Cursors[#operator.Cursors]:Remove()
-            end
-        end, "cancel")
+            end, "heart_add")
+            self:AddOption("Add Cursor", function(invoker, operator, context, cursor, target)
+                if #operator.Cursors < 10 then
+                    operator:CreateCursor()
+                end
+            end, "add")
+            self:AddOption("Remove Cursor", function(invoker, operator, context, cursor, target)
+                if #operator.Cursors > 1 then
+                    operator.Cursors[#operator.Cursors]:Remove()
+                end
+            end, "cancel")
+        end
         self:AddSpacer()
         self:AddOption("Debug Mode", function(invoker, operator, context, cursor, target)
             operator:SetDebug(not operator:GetDebug())
@@ -188,10 +190,12 @@ function ENT:Populate()
         end
 
         if entity:IsPlayer() then
-            self:AddOption("Heal", function(invoker, operator, context, cursor, target)
-                target:SetHealth(math.max(target:Health(), target:GetMaxHealth()))
-                context:Close()
-            end, "heart_add")
+            if not operator:InBalance() or entity ~= invoker then
+                self:AddOption("Heal", function(invoker, operator, context, cursor, target)
+                    target:SetHealth(math.max(target:Health(), target:GetMaxHealth()))
+                    context:Close()
+                end, "heart_add")
+            end
 
             self:AddOption("Ragdoll", function(invoker, operator, context, cursor, target)
                 target:UnLock()
