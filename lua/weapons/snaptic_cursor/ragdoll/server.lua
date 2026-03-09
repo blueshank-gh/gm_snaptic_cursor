@@ -252,12 +252,10 @@ hook.Add("Think", "Snaptic_Ragdoll", function()
     for k, v in player.Iterator() do
         if v.Snaptic_Spectating and IsValid(v.Snaptic_Spectating) then
             local observer_target = v:GetObserverTarget()
-            if IsValid(observer_target) then
-                if observer_target ~= v.Snaptic_Spectating then
-                    Ragdoll.Spectate(v, v.Snaptic_Spectating)
-                end
-                v:SetPos(observer_target:GetPos())
+            if observer_target ~= v.Snaptic_Spectating then
+                Ragdoll.Spectate(v, v.Snaptic_Spectating)
             end
+            v:SetPos(observer_target:GetPos())
         end
     end
 end)
