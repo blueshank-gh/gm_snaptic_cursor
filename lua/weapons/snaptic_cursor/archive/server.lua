@@ -136,6 +136,7 @@ function ENT:Decompress(position, angle)
         local operator = self:GetOperator()
         if not IsValid(operator) then return end
         local owner = operator:GetOwner()
+        if not IsValid(owner) then return end
         duplicator.SetLocalAng(angle or Angle(0,self:GetAngles().y,0))
         duplicator.SetLocalPos(position or self:GetPos())
         local entities = duplicator.Paste(owner, duplication.Entities, duplication.Constraints)
