@@ -522,6 +522,11 @@ do -- DragLogic
     end
 
     -- grab detection code based on newtphysgun @ bonyoze
+    local usable = {
+        ["prop_door_rotating"] = true,
+        ["func_button"] = true
+    }
+
     function SWEP:DragLogic(cursor)
         local owner = self:GetOwner()
         local aim_vector = owner:GetAimVector()
@@ -531,7 +536,7 @@ do -- DragLogic
         local tr = self:TraceLine({
             start = ep,
             endpos = ep + aim_vector * 50000,
-            mask = MASK_SHOT
+            mask = MASK_SOLID
         })
         local offset
         if IsValid(tr.Entity) then
@@ -606,6 +611,10 @@ do -- DragLogic
         end
 
         if SERVER then
+            if IsValid(tr.Entity) and usable[tr.Entity:GetClass()] then
+                cursor:SetType("link")
+            end
+
             if owner:KeyDown(IN_ATTACK) and not self.dragging_debounce then
                 if not self:CanDrag(dragging) and validated then
                     local target_ = target:GetPhysicsObjectCount() <= 1 and self.Helpers.GetTargetEntity(target) or target
@@ -659,6 +668,24 @@ do -- DragLogic
                 end
             elseif self:IsDragging() then
                 self:DragRelease(cursor)
+            end
+
+            local click_state = owner:KeyDown(IN_ATTACK)
+            if click_state ~= self.double_click_state and cursor:GetType() == "link" then
+                self.double_click_state = click_state
+                if click_state then
+                    local st = SysTime()
+                    local double_click_rate = self.CVAR_Double_Click:GetInt() / 1000
+                    if not self.double_click or self.double_click + double_click_rate < st or self.double_click_entity ~= tr.Entity then
+                        self.double_click = st
+                        self.double_click_entity = tr.Entity
+                    elseif self.double_click_entity == tr.Entity then
+                        tr.Entity:Use(owner, owner, USE_TOGGLE, 0)
+                    end
+                    if not self:IsDragging() then
+                        self.Helpers.Click(cursor:GetPos())
+                    end
+                end
             end
         end
 
@@ -994,6 +1021,9 @@ function SWEP:Calculate(active)
         for i=1, 3 do
             self:CreateCursor()
         end
+        self:SetAlways(owner:GetInfoNum("snaptic_cursor_always", 0) == 1)
+        self:SetDrag(owner:GetInfoNum("snaptic_cursor_drag", 1) == 1)
+        self:SetAuto(owner:GetInfoNum("snaptic_cursor_auto", 0) == 1)
     end
 
     if not self.Deferred_Logon then

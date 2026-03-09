@@ -218,16 +218,37 @@ do
         "Rate at which constant damage is applied in milliseconds.",
         0, 10000
     )
+
+    SWEP.CVAR_Double_Click = CreateConVar(
+        "snaptic_cursor_double_click",
+        "500",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Rate at which a double click is registered in milliseconds.",
+        0, 1000
+    )
+
+    if CLIENT then
+        SWEP.CVAR_Always = CreateClientConVar("snaptic_cursor_always", "0", true, true)
+        SWEP.CVAR_Drag = CreateClientConVar("snaptic_cursor_drag", "1", true, true)
+        SWEP.CVAR_Auto = CreateClientConVar("snaptic_cursor_auto", "0", true, true)
+    end
 end
 
 function SWEP:InBalance()
     return self:GetBalance() + self.CVAR_Balance:GetFloat() > CurTime()
 end
 
+local usable = {
+    ["prop_door_rotating"] = true,
+    ["func_button"] = true
+}
+
 function SWEP:CanDrag(entity)
     if not IsValid(entity) then return false end
     local owner = self:GetOwner()
     if not IsValid(owner) then return false end -- This should never happen...
+    local class = entity:GetClass()
+    if usable[class] then return false end
     local interaction = hook.Run("Snaptic.Interact", owner, self, entity)
     if interaction ~= nil then return interaction end
     if entity == owner then return true end
