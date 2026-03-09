@@ -134,7 +134,14 @@ function ENT:Populate()
         return override
     end
 
-    if entity == invoker then
+    if entity == self:GetCursor() then
+        local position = entity:GetPos()
+        self:AddOption("UnZipify", function(invoker, operator, context, cursor, target)
+            cursor:UnZipify(position)
+            context:Close()
+        end, "package_delete")
+        return true
+    elseif entity == invoker then
         self:AddOption("Always Active", function(invoker, operator, context, cursor, target)
             operator:SetAlways(not operator:GetAlways())
             context:Close()
@@ -220,6 +227,11 @@ function ENT:Populate()
             target:Ignite(60)
             context:Close()
         end, "fire")
+
+        self:AddOption("Zipify", function(invoker, operator, context, cursor, target)
+            cursor:Zipify(target)
+            context:Close()
+        end, "package_add")
 
         self:AddOption("Boxify", function(invoker, operator, context, cursor, target)
             operator.Helpers.Boxify(target)
@@ -332,6 +344,9 @@ function ENT:Think()
     end
 
     if SERVER then
+        if entity == self:GetCursor() then
+            entity = operator:GetOwner()
+        end
         local center = operator.Helpers.OBBCenter(entity)
         local self_radius = operator.Helpers.OBBRadius(entity)
 

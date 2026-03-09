@@ -31,8 +31,17 @@ do
         angle:RotateAroundAxis(angle:Up(), -90)
         angle:RotateAroundAxis(angle:Forward(), 90)
 
-        if target ~= operator:GetOwner() then
+        if target ~= operator:GetOwner() and target ~= self:GetCursor() then
             render.DrawLine(position, target:GetPos() + target:OBBCenter(), color_white, true)
+        end
+
+        local cursor = self:GetCursor()
+        if IsValid(cursor) and cursor:GetZipped() then
+            if not self.zipped_position then
+                self.zipped_position = cursor:GetPredictedPos()
+            end
+            render.DrawLine(position, self.zipped_position, color_white, true)
+            render.DrawWireframeBox(self.zipped_position, Angle(0, cursor:GetAngles().y, 0), cursor:GetZippedMin(), cursor:GetZippedMax(), true)
         end
 
         local spacing = self.RenderSpacing

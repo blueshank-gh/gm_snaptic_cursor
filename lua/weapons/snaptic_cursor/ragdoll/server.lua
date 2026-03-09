@@ -9,6 +9,7 @@ function Ragdoll.Spectate(invoker, entity)
 	invoker:SetSolid(SOLID_NONE)
 	invoker:SetNoDraw(true)
 	invoker.Snaptic_Ragdoll_Weapon = invoker:GetActiveWeapon()
+    invoker.Snaptic_Spectating = entity
 	invoker:SetActiveWeapon()
 end
 
@@ -20,6 +21,7 @@ function Ragdoll.UnSpectate(invoker)
 	invoker:SetNoDraw(false)
 	invoker:SetActiveWeapon(invoker.Snaptic_Ragdoll_Weapon)
 	invoker.Snaptic_Ragdoll_Weapon = nil
+    invoker.Snaptic_Spectating = nil
 end
 
 util.AddNetworkString("snaptic_ragdoll_color")
@@ -242,6 +244,14 @@ hook.Add("Think", "Snaptic_Ragdoll", function()
         end
         if ragdoll.duration ~= 0 and ragdoll.time + ragdoll.duration < st then
             ragdoll:Remove()
+        end
+    end
+
+    for k, v in player.Iterator() do
+        if v.Snaptic_Spectating and IsValid(v.Snaptic_Spectating) then
+            if v:GetObserverTarget() ~= v.Snaptic_Spectating then
+                Ragdoll.Spectate(v, v.Snaptic_Spectating)
+            end
         end
     end
 end)

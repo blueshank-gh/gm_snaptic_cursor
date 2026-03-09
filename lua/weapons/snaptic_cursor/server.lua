@@ -100,26 +100,41 @@ function SWEP:SecondaryAttack()
             self.dragging_debounce = true -- debounce for waiting on next attack
         elseif IsValid(self:GetDragCursor()) then
             local drag_cursor = self:GetDragCursor()
-            local owner = self:GetOwner()
-            local aim_vector = owner:GetAimVector()
-            local current = self:GetContext()
-
-            owner:LagCompensation(true)
-            local ep = owner:EyePos()
-            local tr = self:TraceLine({
-                start = ep,
-                endpos = ep + aim_vector * 50000,
-                mask = MASK_SHOT
-            }, owner, current)
-            owner:LagCompensation(false)
-
-            if current and current:GetTarget() == tr.Entity then
-                self:ContextRelease()
+            if drag_cursor:GetZipped() then
+                local owner = self:GetOwner()
+                local ctx = self:CreateContext(drag_cursor, drag_cursor)
+                local ea = owner:EyeAngles()
+                ea.p = 0
+                ea.r = 0
+                local self_radius = self.Helpers.OBBRadius(owner)
+                ctx:SetPos(owner:GetPos() + owner:OBBCenter() + ea:Forward() * (self_radius + 20))
+                ctx:SetAngles((ctx:GetPos() - owner:EyePos()):Angle())
+                local obb = ctx:OBBCenter()
+                obb:Rotate(ctx:GetAngles())
+                self.Helpers.Click(ctx:GetPos())
+                ctx:SetPos(ctx:GetPos() - obb)
             else
-                self:ContextRelease()
-                if tr.Hit and IsValid(tr.Entity) and self:CanDrag(tr.Entity) then
-                    self.Helpers.Click(drag_cursor:GetPos() + drag_cursor:OBBCenter())
-                    self:CreateContext(drag_cursor, tr.Entity)
+                local owner = self:GetOwner()
+                local aim_vector = owner:GetAimVector()
+                local current = self:GetContext()
+
+                owner:LagCompensation(true)
+                local ep = owner:EyePos()
+                local tr = self:TraceLine({
+                    start = ep,
+                    endpos = ep + aim_vector * 50000,
+                    mask = MASK_SHOT
+                }, owner, current)
+                owner:LagCompensation(false)
+
+                if current and current:GetTarget() == tr.Entity then
+                    self:ContextRelease()
+                else
+                    self:ContextRelease()
+                    if tr.Hit and IsValid(tr.Entity) and self:CanDrag(tr.Entity) then
+                        self.Helpers.Click(drag_cursor:GetPos() + drag_cursor:OBBCenter())
+                        self:CreateContext(drag_cursor, tr.Entity)
+                    end
                 end
             end
         end

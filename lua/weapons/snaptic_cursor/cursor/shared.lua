@@ -104,6 +104,10 @@ function ENT:SetupDataTables()
 
     self:NetworkVar("Float", 4, "Redirected") -- damage block feature
     self:NetworkVar("Vector", 0, "Redirection")
+    
+    self:NetworkVar("Bool", 4, "Zipped")
+    self:NetworkVar("Vector", 1, "ZippedMin")
+    self:NetworkVar("Vector", 2, "ZippedMax")
 
     if SERVER then
         self:SetLives(self.CVAR_Lives:GetInt())
@@ -178,6 +182,10 @@ function ENT:OnRemove()
             cursors[self] = nil
             break
         end
+    end
+
+    if self.zip then
+        self:UnZipify()
     end
 end
 
