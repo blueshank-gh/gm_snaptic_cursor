@@ -118,7 +118,7 @@ end
 function ENT:Initialize()
     if self.Initialized then return end
     self:SetModel("models/maxofs2d/cube_tool.mdl")
-    self:SetModelScale(0.2)
+    self:SetModelScale(0.25)
     self:SetColor(Color(255, 255, 255))
 
     local cursors = ENT.Cursors

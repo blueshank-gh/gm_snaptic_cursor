@@ -465,7 +465,6 @@ do -- DragLogic
                     d:SetDamageForce(previous_velocity * 50)
                     d:SetAttacker(owner)
                     d:SetInflictor(cursor)
-                    d:SetDamageCustom(6969)
                     d:SetDamageType(DMG_CRUSH)
                     entity:TakeDamageInfo(d)
                     if damage > self.CVAR_Damage_Ragdoll_Heavy:GetInt() then
@@ -496,7 +495,6 @@ do -- DragLogic
                 d:SetDamagePosition(center)
                 d:SetAttacker(owner)
                 d:SetInflictor(cursor)
-                d:SetDamageCustom(6969)
                 d:SetDamageType(DMG_CRUSH)
                 entity:TakeDamageInfo(d)
                 if entity:Health() <= 0 or not entity:Alive() then

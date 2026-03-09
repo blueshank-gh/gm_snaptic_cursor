@@ -221,7 +221,7 @@ do
 end
 
 function SWEP:InBalance()
-    return self:GetBalance() + self.CVAR_Balance:GetFloat() > SysTime()
+    return self:GetBalance() + self.CVAR_Balance:GetFloat() > CurTime()
 end
 
 function SWEP:CanDrag(entity)
