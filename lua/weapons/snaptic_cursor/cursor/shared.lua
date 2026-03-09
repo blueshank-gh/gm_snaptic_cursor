@@ -81,7 +81,7 @@ function ENT:SetupPhysics()
     self:PhysicsInit(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
-    self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+    self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 end
 
 function ENT:SetupDataTables()
