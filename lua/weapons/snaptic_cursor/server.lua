@@ -176,7 +176,7 @@ function SWEP:Holster(other)
         end
     end
 
-    if not self:GetAlways() then
+    if not self:GetAlways() or IsValid(self:GetOwner():GetObserverTarget()) then
         self.Deferred_Logon = false
         local cursors = self.Cursors
         for i=1, #cursors do
@@ -389,7 +389,7 @@ do -- DragLogic
             phys:ComputeShadowControl(shadowParams)
         end
 
-        if entity ~= owner and ((entity.Health and entity:Health() > 0) or (entity.Alive and entity:Alive())) then -- Slam Detection
+        if (entity ~= owner or self.CVAR_Ragdoll_Self:GetBool()) and ((entity.Health and entity:Health() > 0) or (entity.Alive and entity:Alive())) then -- Slam Detection
             local dt = shadowParams.deltatime
             local start_position = entity:GetPos()
             local end_position = start_position + (previous_velocity / 2) * dt
@@ -401,7 +401,7 @@ do -- DragLogic
                 mins    = mins,
                 maxs    = maxs,
                 filter  = entity,
-                mask    = MASK_SOLID_BRUSHONLY
+                mask    = MASK_SHOT
             }
 
             local slammed = tr.Hit
@@ -409,34 +409,34 @@ do -- DragLogic
             local gForce = 0
             if slammed then
                 local impactSpeed = previous_velocity:Length() - current_velocity:Length()
-                gForce = (impactSpeed / 2) / ((9.81 / 0.0254) * dt)
-                if gForce > 50 then
+                gForce = (impactSpeed / 3) / ((9.81 / 0.0254) * dt)
+                if gForce > 25 then
                     local center = entity:GetPos() + entity:OBBCenter()
-                    local damage = gForce - 50
+                    local damage = gForce - 25
                     local d = DamageInfo()
-                    d:SetDamage(damage)
+                    d:SetDamage(damage / 1.5)
                     d:SetDamagePosition(center)
                     d:SetDamageForce(previous_velocity * 50)
                     d:SetAttacker(owner)
                     d:SetInflictor(owner)
                     d:SetDamageCustom(6969)
                     d:SetDamageType(DMG_CRUSH)
+                    entity:TakeDamageInfo(d)
                     if damage > 100 then
                         EmitSound("Flesh.Break", center)
-                        if isPlayer and damage < entity:Health() then
+                        if isPlayer and entity:Health() > 0 then
                             self.Ragdoll.Start(entity, owner, previous_velocity, self.CVAR_Ragdoll_Duration:GetFloat())
                             self:DragRelease(cursor)
                         end
                     elseif damage > 50 then
                         EmitSound("Flesh.ImpactHard", center)
-                        if isPlayer and damage < entity:Health() then
+                        if isPlayer and entity:Health() > 0 then
                             self.Ragdoll.Start(entity, owner, previous_velocity, self.CVAR_Ragdoll_Duration:GetFloat())
                             self:DragRelease(cursor)
                         end
                     else
                         EmitSound("Flesh.ImpactSoft", center)
                     end
-                    entity:TakeDamageInfo(d)
                 end
             end
         end
@@ -484,6 +484,7 @@ do -- DragLogic
             local min = owner:OBBMins()
             local max = owner:OBBMaxs()
             max.z = 10
+            min.z = -10
             local localPos = owner:WorldToLocal(tr.HitPos)
             if localPos.x >= min.x and localPos.x <= max.x and
                 localPos.y >= min.y and localPos.y <= max.y and
@@ -1037,16 +1038,23 @@ hook.Add("Think", "Snaptic.Hibernate", function()
         if not IsValid(invoker) then continue end
         local active = invoker:GetActiveWeapon()
         local state = active == operator
+        local spectate = IsValid(invoker:GetObserverTarget())
 
-        if operator:GetAlways() or state then
+        if spectate then
+            state = false
+        end
+
+        if not spectate and (operator:GetAlways() or state) then
             operator:Calculate(state)
         end
 
         if state ~= operator.Active then
-            operator.Active = state
             if not state then
                 operator:Holster() -- sometimes holster isn't called...
+            else
+                operator:Deploy()
             end
+            operator.Active = state
         end
     end
 end)

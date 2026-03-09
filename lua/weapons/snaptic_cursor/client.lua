@@ -194,6 +194,7 @@ function SWEP:DragLogic()
         local min = owner:OBBMins()
         local max = owner:OBBMaxs()
         max.z = 10
+        min.z = -10
         local localPos = owner:WorldToLocal(tr.HitPos)
         if localPos.x >= min.x and localPos.x <= max.x and
             localPos.y >= min.y and localPos.y <= max.y and

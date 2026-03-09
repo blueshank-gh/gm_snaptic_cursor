@@ -151,6 +151,14 @@ do
         "How long (in seconds) a player can be stuck in ragdoll after being dunked on.",
         1, 60
     )
+
+    SWEP.CVAR_Ragdoll_Self = CreateConVar(
+        "snaptic_cursor_ragdoll_self",
+        "1",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "If ragdoll slamming can also inflict the user themselves.",
+        0, 1
+    )
 end
 
 function SWEP:CanDrag(entity)

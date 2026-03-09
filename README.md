@@ -26,6 +26,7 @@ List of console variables that can be changed on the server.
 - `snaptic_cursor_superadmin_players` (default: 1) - Allows superadmins to target all players regardless.
 - `snaptic_cursor_admin` (default: 0) - Allows admins to use the cursors.
 - `snaptic_cursor_admin_players` (default: 0) - Allows admins to target all players regardless.
+- `snaptic_cursor_ragdoll_self` (default: 1) - If ragdoll slamming can also inflict the user themselves.
 - `snaptic_cursor_ragdoll_duration` (default: 5) - How long (in seconds) a player can be stuck in ragdoll after being dunked on.
 - `snaptic_cursor_ragdoll_struggle` (default: 1) - How long (in seconds, tick-based) a player can keyboard mash before breaking free from ragdoll.
 - `snaptic_cursor_lives` (default: 4) - Maximum number of i-frame lives for the cursors.

@@ -212,7 +212,7 @@ hook.Add("StartCommand", "Snaptic_Ragdoll", function(invoker, cmd)
         ragdoll.pressed_count = ragdoll.pressed_count + 1
         ragdoll.last_buttons = buttons
 
-        for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+        for i = 1, ragdoll:GetPhysicsObjectCount() - 1 do
             local phys = ragdoll:GetPhysicsObjectNum(i)
             if not IsValid(phys) then continue end
 
