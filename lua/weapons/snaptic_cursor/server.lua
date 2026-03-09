@@ -900,6 +900,7 @@ function SWEP:Calculate(active)
         for i=1, 3 do
             self:CreateCursor()
         end
+        self:EmitSound("snaptic/win7_logon.mp3")
     end
 
     local operators = Snaptic.Operators

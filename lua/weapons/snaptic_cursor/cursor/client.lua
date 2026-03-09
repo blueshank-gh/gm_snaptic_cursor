@@ -148,7 +148,7 @@ do
                     local x = -((seg_width + spacing) * lives) / 2 + (i - 1) * (seg_width + spacing)
                     local fillFrac = 1
                     if i == lives then
-                        fillFrac = math.Clamp(durability / 1000, 0, 1)
+                        fillFrac = math.Clamp(durability / self.MaxDurability, 0, 1)
                     end
                     local w = seg_width * fillFrac
 

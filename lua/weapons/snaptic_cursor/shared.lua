@@ -134,6 +134,30 @@ function SWEP:IsDragging()
     end
 end
 
+-- TODO: We should mimic CBasePlayer::FindUseEntity, wonder why we don't just have a hook to modify FindUseEntity scanning...
+hook.Add("FindUseEntity", "Snaptic.Use", function(invoker, entity)
+    local operator = invoker:GetWeapon("snaptic_cursor")
+    if not IsValid(operator) then return end
+    local active = invoker:GetActiveWeapon()
+    if operator:GetAlways() or active == operator then
+        local ep = invoker:GetShootPos()
+        local tr = operator:TraceLine({
+            start = ep,
+            endpos = ep + invoker:GetAimVector() * 72,
+        })
+
+        local target = tr.Entity
+        if IsValid(target) then
+            if target:IsPlayer() then
+                if SERVER then
+                    target:EmitSound("snaptic/aol_yougotmail.mp3")
+                end
+            end
+            return target
+        end
+    end
+end)
+
 -- CAMI Support
 if CAMI then
     CAMI.RegisterPrivilege({
