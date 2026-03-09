@@ -371,6 +371,9 @@ function ENT:Populate()
                 if not entity.Snaptic then
                     self:AddOption("Archive", function(invoker, operator, context, cursor, target)
                         local archive = ents.Create("snaptic_archive")
+                        if archive.CPPISetOwner then
+                            archive:CPPISetOwner(operator)
+                        end
                         archive:SetOperator(operator)
                         local obb = target:OBBCenter()
                         obb:Rotate(target:GetAngles())
