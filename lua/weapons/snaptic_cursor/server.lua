@@ -611,7 +611,7 @@ do -- DragLogic
         end
 
         if SERVER then
-            local class = tr.Entity:GetClass()
+            local class = IsValid(tr.Entity) and tr.Entity:GetClass() or ""
             if IsValid(tr.Entity) and (usable[class] or string.find(class, "button", 1, true) or string.find(class, "door", 1, true)) then
                 cursor:SetType("link")
             end
