@@ -495,7 +495,7 @@ do -- DragLogic
                 d:SetDamagePosition(center)
                 d:SetAttacker(owner)
                 d:SetInflictor(cursor)
-                d:SetDamageType(DMG_CRUSH)
+                d:SetDamageType(bit.bor(DMG_SHOCK, DMG_BLAST, DMG_BULLET))
                 entity:TakeDamageInfo(d)
                 if entity:Health() <= 0 or not entity:Alive() then
                     self.Helpers.Boxify(entity)
