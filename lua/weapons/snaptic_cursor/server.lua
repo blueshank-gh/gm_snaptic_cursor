@@ -260,7 +260,7 @@ function SWEP:OnRemove()
     end
 
     local cursors = self.Cursors
-    for i=1, #cursors do
+    for i=#cursors, 1, -1 do
         local cursor = cursors[i]
         if IsValid(cursor) then
             cursor:Remove()
@@ -268,7 +268,7 @@ function SWEP:OnRemove()
     end
     
     local operators = Snaptic.Operators
-    for i=1, #operators do
+    for i=#operators, 1, -1 do
         if operators[i] == self then
             table.remove(operators, i)
             operators[self] = nil

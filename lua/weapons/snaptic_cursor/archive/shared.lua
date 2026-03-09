@@ -98,7 +98,7 @@ end
 
 function ENT:OnRemove()
     local archives = ENT.Archives
-    for i=1, #archives do
+    for i=#archives, 1, -1 do
         if archives[i] == self then
             table.remove(archives, i)
             archives[self] = nil

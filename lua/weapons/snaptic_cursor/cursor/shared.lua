@@ -164,7 +164,7 @@ function ENT:OnRemove()
 
     if IsValid(operator) then
         local cursors = operator.Cursors
-        for i=1, #cursors do
+        for i=#cursors, 1, -1 do
             if cursors[i] == self then
                 table.remove(cursors, i)
                 break
@@ -174,7 +174,7 @@ function ENT:OnRemove()
     end
     
     local cursors = ENT.Cursors
-    for i=1, #cursors do
+    for i=#cursors, 1, -1 do
         if cursors[i] == self then
             table.remove(cursors, i)
             cursors[self] = nil
