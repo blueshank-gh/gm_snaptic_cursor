@@ -312,6 +312,10 @@ do -- DragLogic
         local bone = self:GetDragPhysBone()
         local matrix = entity:GetBoneMatrix(entity:TranslatePhysBoneToBone(bone))
         local phys = isPlayer and entity:GetPhysicsObject() or entity:GetPhysicsObjectNum(bone)
+        local movetype = entity:GetMoveType()
+        if movetype == MOVETYPE_CUSTOM or movetype == MOVETYPE_WALK or movetype == MOVETYPE_STEP then
+            phys = nil 
+        end
         if not phys or isPlayer then
             bone = 0
             matrix = false
