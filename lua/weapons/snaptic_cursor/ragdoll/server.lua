@@ -138,17 +138,56 @@ hook.Add("PlayerSpawn", "Snaptic_Ragdoll", function(invoker)
 	end)
 end)
 
---[[hook.Add("PlayerDeath", "Snaptic_Ragdoll", function(victim, inflictor, attacker)
+hook.Add("PlayerDeath", "Snaptic_Ragdoll", function(victim, inflictor, attacker)
     local ragdoll = Ragdoll.GetRagdoll(victim)
     if not IsValid(ragdoll) then return end
-    ragdoll:Remove()
+    
+    Ragdoll.UnSpectate(victim)
+    victim:Dissolve()
+    victim:SetNW2Entity("snaptic.ragdoll", nil)
+    ragdoll:SetNW2Entity("snaptic.ragdoll", nil)
+
+    local r = Ragdoll.registry
+    for i=1, #r do
+        if r[i] == ragdoll then
+            table.remove(r, i)
+            break
+        end
+    end
+
+    ragdoll:RemoveCallOnRemove("Snaptic_Ragdoll")
+    Snaptic.Helpers.Boxify(ragdoll)
+    ragdoll:Dissolve()
+    timer.Simple(5, function()
+        if not IsValid(ragdoll) then return end
+        ragdoll:Remove()
+    end)
 end)
 
 hook.Add("PlayerSilentDeath", "Snaptic_Ragdoll", function(victim)
     local ragdoll = Ragdoll.GetRagdoll(victim)
     if not IsValid(ragdoll) then return end
-    ragdoll:Remove()
-end)]]
+
+    Ragdoll.UnSpectate(victim)
+    victim:SetNW2Entity("snaptic.ragdoll", nil)
+    ragdoll:SetNW2Entity("snaptic.ragdoll", nil)
+
+    local r = Ragdoll.registry
+    for i=1, #r do
+        if r[i] == ragdoll then
+            table.remove(r, i)
+            break
+        end
+    end
+
+    ragdoll:RemoveCallOnRemove("Snaptic_Ragdoll")
+    Snaptic.Helpers.Boxify(ragdoll)
+    ragdoll:Dissolve()
+    timer.Simple(5, function()
+        if not IsValid(ragdoll) then return end
+        ragdoll:Remove()
+    end)
+end)
 
 -- if ragdolled player disconnected, delete their ragdoll
 hook.Add("PlayerDisconnected", "Snaptic_Ragdoll", function(invoker)
@@ -175,6 +214,14 @@ hook.Add("CanPlayerSuicide", "Snaptic_Ragdoll", function(invoker)
     local ragdoll = Ragdoll.GetRagdoll(invoker)
 	if not ragdoll then return end
     return false
+end)
+
+hook.Add("EntityTakeDamage", "Snaptic_Ragdoll", function(target, dmginfo)
+    local controller = Ragdoll.GetController(target)
+    if controller then
+        controller:TakeDamageInfo(dmginfo)
+        return true
+    end
 end)
 
 hook.Add("Think", "Snaptic_Ragdoll", function()
