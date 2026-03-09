@@ -79,7 +79,7 @@ function ENT:SetupPhysics()
     self:SetMoveType(MOVETYPE_NONE)
     if SERVER then self:SetUseType(SIMPLE_USE) end
     self:PhysicsInit(SOLID_VPHYSICS)
-    -- self:SetMoveType(MOVETYPE_VPHYSICS) -- shouldn't really have physics for now
+    self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
     self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 end
@@ -223,8 +223,13 @@ function ENT:Think()
         cursors[self] = true
     end
 
-    if self:GetMoveType() ~= MOVETYPE_NONE then
-        self:SetMoveType(MOVETYPE_NONE)
+    if self:GetMoveType() ~= MOVETYPE_VPHYSICS then
+        self:SetMoveType(MOVETYPE_VPHYSICS)
+    end
+
+    local phys = self:GetPhysicsObject()
+    if IsValid(phys) and phys:IsMotionEnabled() then
+        phys:EnableMotion(false)
     end
 
     local owner = operator:GetOwner()
