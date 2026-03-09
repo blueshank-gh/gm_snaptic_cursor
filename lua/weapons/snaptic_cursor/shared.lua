@@ -161,6 +161,54 @@ do
         "If ragdoll slamming can also inflict the user themselves.",
         0, 1
     )
+
+    SWEP.CVAR_Damage = CreateConVar(
+        "snaptic_cursor_damage",
+        "100",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "If the % of damage caused by whiplash and impacts.",
+        0, 10000
+    )
+
+    SWEP.CVAR_Damage_Ragdoll = CreateConVar(
+        "snaptic_cursor_damage_ragdoll",
+        "1",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "If we should ragdoll players for slam damage.",
+        0, 1
+    )
+
+    SWEP.CVAR_Damage_Ragdoll_Light = CreateConVar(
+        "snaptic_cursor_damage_ragdoll_light",
+        "50",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Amount of damage needed to ragdoll from light damage.",
+        0, 10000
+    )
+
+    SWEP.CVAR_Damage_Ragdoll_Heavy = CreateConVar(
+        "snaptic_cursor_damage_ragdoll_heavy",
+        "100",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Amount of damage needed to ragdoll from heavy damage.",
+        0, 10000
+    )
+
+    SWEP.CVAR_Damage_Constant = CreateConVar(
+        "snaptic_cursor_damage_constant",
+        "0",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Damage that is applied consistantly when picked up.",
+        0, 10000
+    )
+
+    SWEP.CVAR_Damage_Rate = CreateConVar(
+        "snaptic_cursor_damage_rate",
+        "500",
+        { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY },
+        "Rate at which constant damage is applied in milliseconds.",
+        0, 10000
+    )
 end
 
 function SWEP:CanDrag(entity)

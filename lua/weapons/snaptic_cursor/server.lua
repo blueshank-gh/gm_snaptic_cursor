@@ -434,7 +434,8 @@ do -- DragLogic
             phys:ComputeShadowControl(shadowParams)
         end
 
-        if (entity ~= owner or self.CVAR_Ragdoll_Self:GetBool()) and ((entity.Health and entity:Health() > 0) or (entity.Alive and entity:Alive())) then -- Slam Detection
+        local can_damage = ((entity.Health and entity:Health() > 0) or (entity.Alive and entity:Alive()))
+        if (entity ~= owner or self.CVAR_Ragdoll_Self:GetBool()) and can_damage then -- Slam Detection
             local dt = shadowParams.deltatime
             local start_position = entity:GetPos()
             local end_position = start_position + (previous_velocity / 2) * dt
@@ -457,25 +458,25 @@ do -- DragLogic
                 gForce = (impactSpeed / 3) / ((9.81 / 0.0254) * dt)
                 if gForce > 25 then
                     local center = entity:GetPos() + entity:OBBCenter()
-                    local damage = gForce - 25
+                    local damage = (gForce - 25) * self.CVAR_Damage:GetFloat() / 100
                     local d = DamageInfo()
-                    d:SetDamage(damage / 1.5)
+                    d:SetDamage(damage)
                     d:SetDamagePosition(center)
                     d:SetDamageForce(previous_velocity * 50)
                     d:SetAttacker(owner)
-                    d:SetInflictor(owner)
+                    d:SetInflictor(cursor)
                     d:SetDamageCustom(6969)
                     d:SetDamageType(DMG_CRUSH)
                     entity:TakeDamageInfo(d)
-                    if damage > 100 then
+                    if damage > self.CVAR_Damage_Ragdoll_Heavy:GetInt() then
                         EmitSound("Flesh.Break", center)
-                        if isPlayer and entity:Health() > 0 then
+                        if self.CVAR_Damage_Ragdoll:GetBool() and isPlayer and entity:Health() > 0 then
                             self.Ragdoll.Start(entity, owner, previous_velocity, self.CVAR_Ragdoll_Duration:GetFloat())
                             self:DragRelease(cursor)
                         end
-                    elseif damage > 50 then
+                    elseif damage > self.CVAR_Damage_Ragdoll_Light:GetInt() then
                         EmitSound("Flesh.ImpactHard", center)
-                        if isPlayer and entity:Health() > 0 then
+                        if self.CVAR_Damage_Ragdoll:GetBool() and isPlayer and entity:Health() > 0 then
                             self.Ragdoll.Start(entity, owner, previous_velocity, self.CVAR_Ragdoll_Duration:GetFloat())
                             self:DragRelease(cursor)
                         end
@@ -483,6 +484,26 @@ do -- DragLogic
                         EmitSound("Flesh.ImpactSoft", center)
                     end
                 end
+            end
+        end
+
+        if entity ~= owner and entity:IsPlayer() and can_damage and self.CVAR_Damage_Constant:GetInt() > 0 then
+            if not self._Last_DMG_Constant or self._Last_DMG_Constant + (self.CVAR_Damage_Rate:GetFloat() / 1000) < SysTime() then
+                self._Last_DMG_Constant = SysTime()
+                local center = entity:GetPos() + entity:OBBCenter()
+                local d = DamageInfo()
+                d:SetDamage(self.CVAR_Damage_Constant:GetInt())
+                d:SetDamagePosition(center)
+                d:SetAttacker(owner)
+                d:SetInflictor(cursor)
+                d:SetDamageCustom(6969)
+                d:SetDamageType(DMG_CRUSH)
+                entity:TakeDamageInfo(d)
+                if entity:Health() <= 0 or not entity:Alive() then
+                    self.Helpers.Boxify(entity)
+                    self:DragRelease(cursor)
+                end
+                EmitSound("snaptic/skype_message_sent.mp3", center, 0, CHAN_AUTO, 1, 75, 0, 100 + math.random(-25, 25))
             end
         end
 
@@ -1130,7 +1151,13 @@ hook.Add("Think", "Snaptic.Hibernate", function()
     end
 end)
 
-hook.Add("DoPlayerDeath", "Snaptic.Boxify", function(invoker)
+hook.Add("DoPlayerDeath", "Snaptic.Boxify", function(invoker, attacker, dmg)
+    local inflictor = dmg:GetInflictor()
+    if IsValid(inflictor) and inflictor:GetClass() == "snaptic_cursor_handle" then
+        Snaptic.Helpers.Boxify(invoker)
+        return
+    end
+
     local operator = invoker:GetWeapon("snaptic_cursor")
     local active = invoker:GetActiveWeapon()
     if not IsValid(operator) then return end
