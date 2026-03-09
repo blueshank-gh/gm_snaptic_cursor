@@ -46,7 +46,7 @@ function ENT:SetupPhysics()
     self:PhysicsInit(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
-    self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+    self:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE)
 end
 
 function ENT:Initialize()
