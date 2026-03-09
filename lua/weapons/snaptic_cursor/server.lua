@@ -132,6 +132,7 @@ function SWEP:SecondaryAttack()
                 else
                     self:ContextRelease()
                     if tr.Hit and IsValid(tr.Entity) and self:CanDrag(tr.Entity) then
+                        drag_cursor.Trace = tr
                         self.Helpers.Click(drag_cursor:GetPos() + drag_cursor:OBBCenter())
                         self:CreateContext(drag_cursor, tr.Entity)
                     end
