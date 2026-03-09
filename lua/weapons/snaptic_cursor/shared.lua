@@ -149,19 +149,13 @@ hook.Add("FindUseEntity", "Snaptic.Use", function(invoker, entity)
         local target = tr.Entity
         if IsValid(target) then
             if target:IsPlayer() then
-                if SERVER and not target.Snaptic_Use then
+                if SERVER and (not target.Snaptic_Use or target.Snaptic_Use + engine.TickInterval() * 2 < CurTime()) then
                     target:EmitSound("snaptic/aol_yougotmail.mp3")
                 end
                 target.Snaptic_Use = CurTime() -- debounce so that... it doesn't spam...
             end
             return target
         end
-    end
-end)
-
-hook.Add("PlayerTick", "Snaptic.Use", function(invoker)
-    if invoker.Snaptic_Use and invoker.Snaptic_Use + engine.TickInterval() < CurTime() then
-        invoker.Snaptic_Use = nil
     end
 end)
 
